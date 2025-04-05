@@ -26,12 +26,63 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations: 
-  // posts    Post[] // One-to-many
-  // comments Comment[] // One-to-many
-  // likes    Like[] // One-to-many
+  posts    Post[] // One-to-many
+  comments Comment[] // One-to-many
+  likes    Like[] // One-to-many
 
   followers Follows[] @relation(name: "follower") // one-to-many relation
   following Follows[] @relation(name: "following") // one-to-many relation
+}
+
+model Post {
+  // Mendetry fields
+  id       String @id @default(cuid())
+  authorId String
+
+  // Optional fields
+  content String?
+  image   String?
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade) // cascade delete/update means delete/update all posts if author is deleted/updated
+  comments Comment[]
+  likes    Like[]
+}
+
+model Comment {
+  // Mendetry fields
+  id        String   @id @default(cuid())
+  content   String
+  authorId  String
+  postId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // Model level attributes/constraints
+  @@index([authorId, postId]) // composite index for faster queries
+}
+
+model Like {
+  // Mendetry fields
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // Model level attributes/constraints
+  @@unique([userId, postId]) // this prevents same user liking post twice
+  @@index([userId, postId]) // composite index for faster queries
 }
 
 model Follows {
