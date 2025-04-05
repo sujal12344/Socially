@@ -35,9 +35,11 @@ model User {
 }
 
 model Follows {
+  // Mendetry fields
   followerId  String
   followingId String
 
+  // Optional fields
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -45,6 +47,7 @@ model Follows {
   follower  User @relation(name: "follower", fields: [followerId], references: [id], onDelete: Cascade)
   following User @relation(name: "following", fields: [followingId], references: [id], onDelete: Cascade)
 
-  @@id([followerId, followingId])
-  @@index([followerId, followingId])
+  // Model level attributes/constraints
+  @@id([followerId, followingId]) // Composite primary key. This means that the combination of followerId and followingId must be unique
+  @@index([followerId, followingId]) // Index for faster lookups. This is optional but can improve performance for large datasets
 }
