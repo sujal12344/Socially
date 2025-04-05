@@ -51,10 +51,3 @@ model Follows {
   @@id([followerId, followingId]) // Composite primary key. This means that the combination of followerId and followingId must be unique
   @@index([followerId, followingId]) // Index for faster lookups. This is optional but can improve performance for large datasets
 }
-
-model test {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
