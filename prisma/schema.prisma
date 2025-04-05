@@ -32,6 +32,9 @@ model User {
 
   followers Follows[] @relation(name: "follower") // one-to-many relation
   following Follows[] @relation(name: "following") // one-to-many relation
+
+  Notification         Notification[] @relation("userNotifications")
+  notificationsCreated Notification[] @relation("notificationCreator")
 }
 
 model Post {
@@ -48,9 +51,10 @@ model Post {
   updatedAt DateTime @updatedAt
 
   // Relations
-  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade) // cascade delete/update means delete/update all posts if author is deleted/updated
-  comments Comment[]
-  likes    Like[]
+  author       User           @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: Cascade) // cascade delete/update means delete/update all posts if author is deleted/updated
+  comments     Comment[]
+  likes        Like[]
+  Notification Notification[]
 }
 
 model Comment {
@@ -62,8 +66,9 @@ model Comment {
   createdAt DateTime @default(now())
 
   // Relations
-  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author       User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post         Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  Notification Notification[]
 
   // Model level attributes/constraints
   @@index([authorId, postId]) // composite index for faster queries
@@ -101,4 +106,37 @@ model Follows {
   // Model level attributes/constraints
   @@id([followerId, followingId]) // Composite primary key. This means that the combination of followerId and followingId must be unique
   @@index([followerId, followingId]) // Index for faster lookups. This is optional but can improve performance for large datasets
+}
+
+model Notification {
+  // Mendetry fields
+  id        String           @id @default(cuid())
+  userId    String
+  creatorId String
+  type      NotificationType
+  read      Boolean          @default(false)
+
+  // Optional fields
+  postId    String?
+  commentId String?
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User @relation("userNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  creator User @relation("notificationCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  // Model level attributes/constraints
+  @@index([userId, createdAt])
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
 }
