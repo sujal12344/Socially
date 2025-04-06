@@ -13,7 +13,7 @@ import { Card, CardContent } from "./ui/card";
 import Link from "next/link";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { formatDistanceToNow } from "date-fns";
-// import { DeleteAlertDialog } from "./DeleteAlertDialog";
+import { DeleteAlertDialog } from "./DeleteAlertDialog";
 import { Button } from "./ui/button";
 import {
   HeartIcon,
@@ -44,7 +44,7 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
       setIsLiking(true);
       setHasLiked((prev) => !prev);
       setOptmisticLikes((prev) => prev + (hasLiked ? -1 : 1));
-      // await toggleLike(post.id);
+      await toggleLike(post.id);
     } catch (error) {
       setOptmisticLikes(post._count.likes);
       setHasLiked(post.likes.some((like) => like.userId === dbUserId));
@@ -115,9 +115,12 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                   </div>
                 </div>
                 {/* Check if current user is the post author */}
-                {dbUserId === post.author.id &&
-                  // <DeleteAlertDialog isDeleting={isDeleting} onDelete={handleDeletePost} />
-                  "Hello"}
+                {dbUserId === post.author.id && (
+                  <DeleteAlertDialog
+                    isDeleting={isDeleting}
+                    onDelete={handleDeletePost}
+                  />
+                )}
               </div>
               <p className="mt-2 text-sm text-foreground break-words">
                 {post.content}
