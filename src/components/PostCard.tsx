@@ -1,7 +1,11 @@
 "use client";
 
-// import { createComment, deletePost, getPosts, toggleLike } from "@/actions/post.action";
-import { getPosts } from "@/actions/post.action";
+import {
+  createComment,
+  deletePost,
+  getPosts,
+  toggleLike,
+} from "@/actions/post.action";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -19,8 +23,8 @@ import {
 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 
-type Posts = Awaited<ReturnType<typeof getPosts>>;
-type Post = Posts[number];
+type Posts = Awaited<ReturnType<typeof getPosts>>; // less understanding of the type system
+type Post = Posts[number]; // less understanding of the type system
 
 function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
   const { user } = useUser();
@@ -53,11 +57,11 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
     if (!newComment.trim() || isCommenting) return;
     try {
       setIsCommenting(true);
-      // const result = await createComment(post.id, newComment);
-      // if (result?.success) {
-      //   toast.success("Comment posted successfully");
-      //   setNewComment("");
-      // }
+      const result = await createComment(post.id, newComment);
+      if (result?.success) {
+        toast.success("Comment posted successfully");
+        setNewComment("");
+      }
     } catch (error) {
       toast.error("Failed to add comment");
     } finally {
@@ -69,9 +73,9 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
     if (isDeleting) return;
     try {
       setIsDeleting(true);
-      // const result = await deletePost(post.id);
-      // if (result.success) toast.success("Post deleted successfully");
-      // else throw new Error(result.error);
+      const result = await deletePost(post.id);
+      if (result.success) toast.success("Post deleted successfully");
+      else throw new Error(result.error);
     } catch (error) {
       toast.error("Failed to delete post");
     } finally {
