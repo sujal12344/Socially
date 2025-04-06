@@ -133,6 +133,7 @@ export async function toggleFollow(targetUserId: string) {
     if (existingFollow) {
       // unfollow
       await prisma.follows.delete({
+        // delete the follow if already follow and again click for unfollow
         where: {
           followerId_followingId: {
             followerId: userId,
@@ -141,8 +142,10 @@ export async function toggleFollow(targetUserId: string) {
         },
       });
     } else {
-      // follow
+      // follow and create the follow and notification in a transaction
       await prisma.$transaction([
+        // transaction to ensure both operations are done or none (I mean ya to dono hoga ya fir koi nahi)
+        // create follow
         prisma.follows.create({
           data: {
             followerId: userId,
@@ -150,6 +153,7 @@ export async function toggleFollow(targetUserId: string) {
           },
         }),
 
+        // create notification
         prisma.notification.create({
           data: {
             type: "FOLLOW",
