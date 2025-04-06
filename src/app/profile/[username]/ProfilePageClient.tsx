@@ -45,7 +45,7 @@ interface ProfilePageClientProps {
   isFollowing: boolean;
 }
 
-function ProfilePageClient({
+export default function ProfilePageClient({
   isFollowing: initialIsFollowing,
   likedPosts,
   posts,
@@ -314,4 +314,3 @@ function ProfilePageClient({
     </div>
   );
 }
-export default ProfilePageClient;
