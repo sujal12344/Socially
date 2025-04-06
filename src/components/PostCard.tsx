@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { Card, CardContent } from "./ui/card";
 import Link from "next/link";
 import { Avatar, AvatarImage } from "./ui/avatar";
-// import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 // import { DeleteAlertDialog } from "./DeleteAlertDialog";
 import { Button } from "./ui/button";
 import {
@@ -105,7 +105,9 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                       @{post.author.username}
                     </Link>
                     <span>•</span>
-                    {/* <span>{formatDistanceToNow(new Date(post.createdAt))} ago</span> */}
+                    <span>
+                      {formatDistanceToNow(new Date(post.createdAt))} ago
+                    </span>
                   </div>
                 </div>
                 {/* Check if current user is the post author */}
@@ -200,7 +202,7 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                         </span>
                         <span className="text-sm text-muted-foreground">·</span>
                         <span className="text-sm text-muted-foreground">
-                          {/* {formatDistanceToNow(new Date(comment.createdAt))} ago */}
+                          {formatDistanceToNow(new Date(comment.createdAt))} ago
                         </span>
                       </div>
                       <p className="text-sm break-words">{comment.content}</p>
