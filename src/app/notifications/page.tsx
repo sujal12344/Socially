@@ -14,8 +14,8 @@ import { HeartIcon, MessageCircleIcon, UserPlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-type Notifications = Awaited<ReturnType<typeof getNotifications>>;
-type Notification = Notifications[number];
+type Notifications = Awaited<ReturnType<typeof getNotifications>>; // less understanding of the type system
+type Notification = Notifications[number]; // less understanding of the type system
 
 const getNotificationIcon = (type: string) => {
   switch (type) {
