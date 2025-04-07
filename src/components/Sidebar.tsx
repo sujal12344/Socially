@@ -8,16 +8,9 @@ import { Avatar, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import { LinkIcon, MapPinIcon } from "lucide-react";
 
-// Helper function to format URLs for display
 function formatUrlForDisplay(url: string): string {
-  // Remove protocol (http:// or https://)
   let formatted = url.replace(/^https?:\/\//, "");
-
-  // Remove trailing slash if present
-  if (formatted.endsWith("/")) {
-    formatted = formatted.slice(0, -1);
-  }
-
+  if (formatted.endsWith("/")) formatted = formatted.slice(0, -1);
   return formatted;
 }
 
