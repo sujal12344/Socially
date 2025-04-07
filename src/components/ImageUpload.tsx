@@ -22,10 +22,10 @@ function ImageUpload({ endpoint, onChange, value }: ImageUploadProps) {
           aria-label="Remove image"
           title="Remove image"
           onClick={() => onChange("")}
-          className="absolute top-0 right-0 p-1 bg-red-500 rounded-full shadow-sm"
+          className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full shadow-sm"
           type="button"
         >
-          <XIcon className="h-4 w-4 text-white" />
+          <XIcon className="size-3 text-white" />
         </button>
       </div>
     );
