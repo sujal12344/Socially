@@ -8,6 +8,19 @@ import { Avatar, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import { LinkIcon, MapPinIcon } from "lucide-react";
 
+// Helper function to format URLs for display
+function formatUrlForDisplay(url: string): string {
+  // Remove protocol (http:// or https://)
+  let formatted = url.replace(/^https?:\/\//, "");
+
+  // Remove trailing slash if present
+  if (formatted.endsWith("/")) {
+    formatted = formatted.slice(0, -1);
+  }
+
+  return formatted;
+}
+
 async function Sidebar() {
   const authUser = await currentUser();
   if (!authUser) return <UnAuthenticatedSidebar />;
@@ -63,11 +76,16 @@ async function Sidebar() {
                 <LinkIcon className="w-4 h-4 mr-2 shrink-0" />
                 {user.website ? (
                   <a
-                    href={`${user.website}`}
+                    href={
+                      user.website.startsWith("https")
+                        ? user.website
+                        : `https://${user.website}`
+                    }
                     className="hover:underline truncate"
                     target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    {user.website}
+                    {formatUrlForDisplay(user.website)}
                   </a>
                 ) : (
                   "No website"
