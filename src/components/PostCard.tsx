@@ -100,7 +100,7 @@ function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 truncate">
                   <Link
                     href={`/profile/${post.author.username}`}
-                    className="font-semibold truncate"
+                    className="font-semibold truncate hover:underline"
                   >
                     {post.author.name}
                   </Link>
