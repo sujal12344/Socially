@@ -30,7 +30,7 @@ function FollowButton({ userId }: { userId: string }) {
       size="sm"
       variant={isFollowing ? "outline" : "default"}
       className={cn(
-        "transition-all duration-300",
+        "transition-all duration-300 hover:opacity-70",
         isFollowing &&
           "hover:bg-destructive/10 hover:text-destructive hover:border-destructive",
         isLoading && "opacity-70"
