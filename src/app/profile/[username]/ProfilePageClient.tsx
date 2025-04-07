@@ -32,6 +32,7 @@ import {
   LinkIcon,
   MapPinIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -115,30 +116,30 @@ export default function ProfilePageClient({
                 {/* PROFILE STATS */}
                 <div className="w-full mt-6">
                   <div className="flex justify-between mb-4">
-                    <div>
+                    <Link href={`/profile/${user.username}/followings`}>
                       <div className="font-semibold">
                         {user._count.following.toLocaleString()}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         Following
                       </div>
-                    </div>
+                    </Link>
                     <Separator orientation="vertical" />
-                    <div>
+                    <Link href={`/profile/${user.username}/followers`}>
                       <div className="font-semibold">
                         {user._count.followers.toLocaleString()}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         Followers
                       </div>
-                    </div>
+                    </Link>
                     <Separator orientation="vertical" />
-                    <div>
+                    <Link href={`/profile/${user.username}/posts`}>
                       <div className="font-semibold">
                         {user._count.posts.toLocaleString()}
                       </div>
                       <div className="text-sm text-muted-foreground">Posts</div>
-                    </div>
+                    </Link>
                   </div>
                 </div>
 
