@@ -54,6 +54,112 @@ export async function getUserByClerkId(clerkId: string) {
   });
 }
 
+export async function getUserByUsername(username: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { username },
+      include: {
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+            posts: true,
+          },
+        },
+      },
+    });
+
+    return user;
+  } catch (error) {
+    console.error("Error fetching user by username:", error);
+    return null;
+  }
+}
+
+export async function getUserFollowers(username: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: { id: true },
+    });
+
+    if (!user) return null;
+
+    const followers = await prisma.follows.findMany({
+      where: { followingId: user.id },
+      select: {
+        follower: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            image: true,
+            bio: true,
+            _count: {
+              select: {
+                followers: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return followers.map((follow) => follow.follower);
+  } catch (error) {
+    console.error("Error fetching user followers:", error);
+    return null;
+  }
+}
+
+export async function getUserFollowings(username: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: { id: true },
+    });
+
+    if (!user) return null;
+
+    const following = await prisma.follows.findMany({
+      where: { followerId: user.id },
+      select: {
+        following: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            image: true,
+            bio: true,
+            _count: {
+              select: {
+                followers: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // const currentUserDBId = await getDbUserId();
+    // if (!currentUserDBId) return null; // user not logged in
+
+    // const follow = await prisma.follows.findUnique({
+    //   where: {
+    //     followerId_followingId: {
+    //       followerId: currentUserDBId,
+    //       followingId: user.id,
+    //     },
+    //   },
+    // });
+
+    return following.map((follow) => follow.following);
+  } catch (error) {
+    console.error("Error fetching user following:", error);
+    return null;
+  }
+}
+
 export async function getDbUserId() {
   const { userId: clerkId } = await auth();
   if (!clerkId) return null;
@@ -169,5 +275,32 @@ export async function toggleFollow(targetUserId: string) {
   } catch (error) {
     console.log("Error in toggleFollow", error);
     return { success: false, error: "Error toggling follow" };
+  }
+}
+
+export async function isFollowedTargetUser(targetUserDBId: string) {
+  try {
+    const currentUserDBId = await getDbUserId();
+
+    if (!targetUserDBId) return false;
+    if (!currentUserDBId) return false; // user not logged in
+
+    if (currentUserDBId === targetUserDBId) return false; // you cannot follow yourself
+
+    const follow = await prisma.follows.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: currentUserDBId,
+          followingId: targetUserDBId,
+        },
+      },
+    });
+    console.log("follow", follow);
+    console.log("follow", !!follow);
+
+    return !!follow;
+  } catch (error) {
+    console.error("Error checking follow status:", error);
+    return false;
   }
 }
