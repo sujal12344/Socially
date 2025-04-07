@@ -47,22 +47,28 @@ async function Sidebar() {
             <div className="w-full">
               <Separator className="my-4" />
               <div className="flex justify-between">
-                <div>
+                <Link href={`/profile/${user.username}/followings`}>
                   <p className="font-medium">{user._count.following}</p>
-                  <p className="text-xs text-muted-foreground">Following</p>
-                </div>
+                  <p className="text-xs text-muted-foreground hover:underline">
+                    Following
+                  </p>
+                </Link>
                 <Separator orientation="vertical" />
-                <div>
+                <Link href={`/profile/${user.username}/followers`}>
                   <p className="font-medium">{user._count.followers}</p>
-                  <p className="text-xs text-muted-foreground">Followers</p>
-                </div>
+                  <p className="text-xs text-muted-foreground hover:underline">
+                    Followers
+                  </p>
+                </Link>
                 <Separator orientation="vertical" />
-                <div>
+                <Link href={`/profile/${user.username}/posts`}>
                   <p className="font-medium">
                     {user._count.posts.toLocaleString()}
                   </p>
-                  <p className="text-xs text-muted-foreground">Posts</p>
-                </div>
+                  <p className="text-xs text-muted-foreground hover:underline">
+                    Posts
+                  </p>
+                </Link>
               </div>
               <Separator className="my-4" />
             </div>
