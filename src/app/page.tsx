@@ -23,7 +23,7 @@ export default async function Home() {
       </div>
 
       <div className="lg:col-span-4">
-        <div className="sticky top-20">
+        <div className="sticky top-24">
           <WhoToFollow />
         </div>
       </div>

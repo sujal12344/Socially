@@ -22,7 +22,7 @@ async function Sidebar() {
   if (!user) return null;
 
   return (
-    <div className="sticky top-20">
+    <div className="sticky top-24">
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col items-center text-center">
@@ -102,7 +102,7 @@ async function Sidebar() {
 export default Sidebar;
 
 const UnAuthenticatedSidebar = () => (
-  <div className="sticky top-20">
+  <div className="sticky top-24">
     <Card>
       <CardHeader>
         <CardTitle className="text-center text-xl font-semibold">
