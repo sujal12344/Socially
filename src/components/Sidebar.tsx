@@ -56,6 +56,13 @@ async function Sidebar() {
                   <p className="font-medium">{user._count.followers}</p>
                   <p className="text-xs text-muted-foreground">Followers</p>
                 </div>
+                <Separator orientation="vertical" />
+                <div>
+                  <p className="font-medium">
+                    {user._count.posts.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Posts</p>
+                </div>
               </div>
               <Separator className="my-4" />
             </div>
