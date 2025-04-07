@@ -22,8 +22,10 @@ export default async function Home() {
         </div>
       </div>
 
-      <div className="hidden lg:block lg:col-span-4 sticky top-20">
-        <WhoToFollow />
+      <div className="lg:col-span-4">
+        <div className="sticky top-20">
+          <WhoToFollow />
+        </div>
       </div>
     </div>
   );
