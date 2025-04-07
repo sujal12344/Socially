@@ -7,12 +7,7 @@ import Link from "next/link";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import { LinkIcon, MapPinIcon } from "lucide-react";
-
-function formatUrlForDisplay(url: string): string {
-  let formatted = url.replace(/^https?:\/\//, "");
-  if (formatted.endsWith("/")) formatted = formatted.slice(0, -1);
-  return formatted;
-}
+import { formatUrlForDisplay } from "@/lib/utils";
 
 async function Sidebar() {
   const authUser = await currentUser();
