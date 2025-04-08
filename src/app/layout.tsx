@@ -58,11 +58,13 @@ export default function RootLayout({
                     </div>
                     <div className="grid grid-cols-1 col-span-9 lg:grid-cols-10 gap-6">
                       <div className="lg:col-span-6">{children}</div>
+                      {/* <Suspense fallback={<WhoToFollowLoading />}> */}
                       <div className="lg:col-span-4">
                         <div className="sticky top-24">
                           <WhoToFollow />
                         </div>
                       </div>
+                      {/* </Suspense> */}
                     </div>
                   </div>
                 </div>

@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function Loading() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
-      <div className="lg:col-span-6">
+      <div className="lg:col-span-10">
         {/* Create Post Skeleton */}
         <Card className="mb-6">
           <CardContent className="pt-6">
@@ -49,7 +49,7 @@ export default function Loading() {
       </div>
 
       {/* Who To Follow Skeleton */}
-      <div className="hidden lg:block lg:col-span-4 sticky top-24">
+      {/* <div className="hidden lg:block lg:col-span-4 sticky top-24">
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-32" />
@@ -71,7 +71,7 @@ export default function Loading() {
               ))}
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </div>
   );
 }

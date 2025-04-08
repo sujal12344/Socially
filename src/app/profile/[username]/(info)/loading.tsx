@@ -1,4 +1,3 @@
-// Add in each route folder (followers, followings, posts)
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
