@@ -190,7 +190,30 @@ export async function getRandomUsers() {
   try {
     const userId = await getDbUserId();
 
-    if (!userId) return [];
+    if (!userId) {
+      // return popular users if user is not logged in, so it can interest new users to sign up
+      const popularUsers = await prisma.user.findMany({
+        orderBy: {
+          followers: {
+            _count: "desc",
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          image: true,
+          _count: {
+            select: {
+              followers: true,
+            },
+          },
+        },
+        take: 3,
+      });
+      revalidatePath("/");
+      return popularUsers;
+    }
 
     // get 3 random users exclude ourselves & users that we already follow
     const randomUsers = await prisma.user.findMany({
@@ -219,11 +242,11 @@ export async function getRandomUsers() {
           },
         },
       },
-      // orderBy: {
-      //   followers: {
-      //     _count: "asc",
-      //   },
-      // },
+      orderBy: {
+        followers: {
+          _count: "desc",
+        },
+      },
       take: 3,
     });
 
