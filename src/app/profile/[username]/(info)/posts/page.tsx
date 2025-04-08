@@ -19,8 +19,10 @@ export default async function PostsPage({ params }: Props) {
     notFound();
   }
 
-  const posts = await getUserPosts(user.id);
-  const dbUserId = await getDbUserId();
+  const [posts, dbUserId] = await Promise.all([
+    await getUserPosts(user.id),
+    await getDbUserId(),
+  ]);
 
   if (!posts) {
     notFound();
