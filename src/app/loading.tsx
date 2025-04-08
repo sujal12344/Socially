@@ -10,7 +10,7 @@ export default function Loading() {
           <CardContent className="pt-6">
             <div className="space-y-4">
               <div className="flex space-x-4">
-                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-10 w-11 rounded-full" />
                 <Skeleton className="h-24 w-full" />
               </div>
               <div className="flex items-center justify-between border-t pt-4">

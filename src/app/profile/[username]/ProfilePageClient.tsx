@@ -207,7 +207,7 @@ export default function ProfilePageClient({
             <TabsTrigger
               value="posts"
               className="flex items-center gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary
-               data-[state=active]:bg-transparent px-6 font-semibold"
+               data-[state=active]:bg-transparent px-6 font-semibold w-full"
             >
               <FileTextIcon className="size-4" />
               Posts
@@ -215,7 +215,7 @@ export default function ProfilePageClient({
             <TabsTrigger
               value="likes"
               className="flex items-center gap-2 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary
-               data-[state=active]:bg-transparent px-6 font-semibold"
+               data-[state=active]:bg-transparent px-6 font-semibold w-full"
             >
               <HeartIcon className="size-4" />
               Likes
