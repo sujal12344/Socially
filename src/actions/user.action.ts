@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { isFollowing } from "./profile.action";
 
 export async function syncUser() {
   try {
@@ -105,7 +106,19 @@ export async function getUserFollowers(username: string) {
       },
     });
 
-    return followers.map((follow) => follow.follower);
+    // Get all users and fetch their isFollowing status in parallel
+    const followersWithStatus = await Promise.all(
+      followers.map(async (follow) => {
+        const isFollowingStatus = await isFollowing(follow.follower.id);
+        return {
+          ...follow.follower,
+          isFollowing: isFollowingStatus,
+        };
+      })
+    );
+
+    revalidatePath(`/profile/${username}/followers`);
+    return followersWithStatus;
   } catch (error) {
     console.error("Error fetching user followers:", error);
     return null;
@@ -141,19 +154,19 @@ export async function getUserFollowings(username: string) {
       },
     });
 
-    // const currentUserDBId = await getDbUserId();
-    // if (!currentUserDBId) return null; // user not logged in
+    // Get all users and fetch their isFollowing status in parallel
+    const followingWithStatus = await Promise.all(
+      following.map(async (follow) => {
+        const isFollowingStatus = await isFollowing(follow.following.id);
+        return {
+          ...follow.following,
+          isFollowing: isFollowingStatus,
+        };
+      })
+    );
 
-    // const follow = await prisma.follows.findUnique({
-    //   where: {
-    //     followerId_followingId: {
-    //       followerId: currentUserDBId,
-    //       followingId: user.id,
-    //     },
-    //   },
-    // });
-
-    return following.map((follow) => follow.following);
+    revalidatePath(`/profile/${username}/followings`);
+    return followingWithStatus;
   } catch (error) {
     console.error("Error fetching user following:", error);
     return null;
@@ -167,6 +180,8 @@ export async function getDbUserId() {
   const user = await getUserByClerkId(clerkId);
 
   if (!user) throw new Error("User not found");
+
+  revalidatePath("/");
 
   return user.id;
 }
@@ -211,6 +226,8 @@ export async function getRandomUsers() {
       // },
       take: 3,
     });
+
+    revalidatePath("/");
 
     return randomUsers;
   } catch (error) {
@@ -295,8 +312,8 @@ export async function isFollowedTargetUser(targetUserDBId: string) {
         },
       },
     });
-    console.log("follow", follow);
-    console.log("follow", !!follow);
+
+    revalidatePath("/");
 
     return !!follow;
   } catch (error) {
