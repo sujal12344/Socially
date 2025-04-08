@@ -5,7 +5,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useUser } from "@clerk/nextjs";
+import { SignInButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
@@ -27,7 +27,7 @@ export default function UserCard({
   user,
   isFollowing: initialIsFollowing,
 }: UserCardProps) {
-  const { user: currentUser } = useUser();
+  const currentUser = useUser().user;
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -75,18 +75,26 @@ export default function UserCard({
       </Link>
 
       {!isCurrentUser ? (
-        <Button
-          onClick={handleFollow}
-          size="sm"
-          variant={isFollowing ? "outline" : "default"}
-          className={cn(
-            isFollowing &&
-              "hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-          )}
-          disabled={isLoading}
-        >
-          {isLoading ? "Loading..." : isFollowing ? "Following" : "Follow"}
-        </Button>
+        currentUser ? (
+          <Button
+            onClick={handleFollow}
+            size="sm"
+            variant={isFollowing ? "outline" : "default"}
+            className={cn(
+              isFollowing &&
+                "hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
+            )}
+            disabled={isLoading}
+          >
+            {isLoading ? "Loading..." : isFollowing ? "Following" : "Follow"}
+          </Button>
+        ) : (
+          <SignInButton mode="modal">
+            <Button size="sm" variant="default">
+              Follow
+            </Button>
+          </SignInButton>
+        )
       ) : (
         <Link href={`/profile/${user.username}`}>
           <Button size="sm" variant="outline">
