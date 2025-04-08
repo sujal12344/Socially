@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import toast from "react-hot-toast";
 import { toggleFollow } from "@/actions/user.action";
 import { cn } from "@/lib/utils";
+import { SignInButton, useUser } from "@clerk/nextjs";
 
 function FollowButton({ userId }: { userId: string }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +25,9 @@ function FollowButton({ userId }: { userId: string }) {
     }
   };
 
-  return (
+  const user = useUser().user;
+
+  return user ? (
     <Button
       onClick={handleFollow}
       size="sm"
@@ -48,6 +51,16 @@ function FollowButton({ userId }: { userId: string }) {
         "Follow"
       )}
     </Button>
+  ) : (
+    <SignInButton mode="modal">
+      <Button
+        size="sm"
+        variant="default"
+        className={cn("transition-all duration-300 hover:opacity-70")}
+      >
+        Follow
+      </Button>
+    </SignInButton>
   );
 }
 export default FollowButton;
