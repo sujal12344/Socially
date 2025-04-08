@@ -8,10 +8,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { formatUrlForDisplay } from "@/lib/utils";
-import { CalendarIcon, LinkIcon, MapPinIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  LinkIcon,
+  MapPinIcon,
+  MessageCircleIcon,
+} from "lucide-react";
 import { format } from "date-fns";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 export default function ProfileHeader({ username }: { username: string }) {
   const { user: currentUser, isLoaded } = useUser();
@@ -98,21 +104,30 @@ export default function ProfileHeader({ username }: { username: string }) {
               {isLoaded &&
                 !isCurrentUser &&
                 (currentUser ? (
-                  <Button
-                    onClick={handleToggleFollow}
-                    variant={isFollowing ? "outline" : "default"}
-                    className={cn(
-                      isFollowing &&
-                        "hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                    )}
-                    disabled={isFollowLoading}
-                  >
-                    {isFollowLoading
-                      ? "Loading..."
-                      : isFollowing
-                      ? "Following"
-                      : "Follow"}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleToggleFollow}
+                      variant={isFollowing ? "outline" : "default"}
+                      className={cn(
+                        isFollowing &&
+                          "hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
+                      )}
+                      disabled={isFollowLoading}
+                    >
+                      {isFollowLoading
+                        ? "Loading..."
+                        : isFollowing
+                        ? "Following"
+                        : "Follow"}
+                    </Button>
+
+                    <Button asChild variant="outline">
+                      <Link href={`/chat/${profile.username}`}>
+                        <MessageCircleIcon className="mr-2 h-4 w-4" />
+                        Message
+                      </Link>
+                    </Button>
+                  </div>
                 ) : (
                   <SignInButton mode="modal">
                     <Button size="sm" variant="default">
