@@ -35,29 +35,8 @@ export async function getProfileByUsername(username: string) {
   }
 }
 
-export async function getUserByUsernameOrUserIdPosts(
-  userId?: string | null,
-  username?: string | null
-) {
+export async function getUserPosts(userId: string) {
   try {
-    if (!userId && !username)
-      throw new Error("User ID or username is required");
-
-    if (username) {
-      const user = await prisma.user.findUnique({
-        where: { username },
-        select: {
-          id: true,
-        },
-      });
-
-      if (!user) throw new Error("User not found");
-
-      userId = user.id;
-    }
-
-    if (!userId) throw new Error("User ID is required");
-
     const posts = await prisma.post.findMany({
       where: {
         authorId: userId,
