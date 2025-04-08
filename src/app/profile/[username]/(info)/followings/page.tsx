@@ -30,7 +30,11 @@ export default async function FollowingsPage({ params }: Props) {
         ) : (
           <div className="divide-y">
             {following.map((user) => (
-              <UserCard key={user.id} user={user} />
+              <UserCard
+                key={user.id}
+                user={user}
+                isFollowing={user.isFollowing}
+              />
             ))}
           </div>
         )}
