@@ -1,12 +1,11 @@
 "use client";
 
-import { isFollowedTargetUser, toggleFollow } from "@/actions/user.action";
+import { toggleFollow } from "@/actions/user.action";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
@@ -34,15 +33,6 @@ export default function UserCard({
 
   const isCurrentUser =
     currentUser?.emailAddresses[0].emailAddress.split("@")[0] === user.username;
-
-  React.useEffect(() => {
-    async function checkIfFollowing() {
-      if (isCurrentUser) return;
-      const result = await isFollowedTargetUser(user.id);
-      setIsFollowing(result || false);
-    }
-    checkIfFollowing();
-  }, [user.id]);
 
   async function handleFollow() {
     if (isCurrentUser) return;
