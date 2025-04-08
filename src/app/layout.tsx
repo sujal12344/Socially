@@ -10,6 +10,7 @@ import { Toaster } from "react-hot-toast";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
+import WhoToFollow from "@/components/WhoToFollow";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -55,7 +56,14 @@ export default function RootLayout({
                     <div className="hidden lg:block lg:col-span-3">
                       <Sidebar />
                     </div>
-                    <div className="lg:col-span-9">{children}</div>
+                    <div className="grid grid-cols-1 col-span-9 lg:grid-cols-10 gap-6">
+                      <div className="lg:col-span-6">{children}</div>
+                      <div className="lg:col-span-4">
+                        <div className="sticky top-24">
+                          <WhoToFollow />
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </main>
