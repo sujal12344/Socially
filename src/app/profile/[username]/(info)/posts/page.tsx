@@ -1,8 +1,8 @@
 import { getDbUserId } from "@/actions/user.action";
-import { getUserPosts } from "@/actions/post.action";
 import PostCard from "@/components/PostCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { notFound } from "next/navigation";
+import { getProfileByUsername, getUserPosts } from "@/actions/profile.action";
 
 interface Props {
   params: {
@@ -13,7 +13,13 @@ interface Props {
 export default async function PostsPage({ params }: Props) {
   const { username } = params;
 
-  const posts = await getUserPosts(username);
+  const user = await getProfileByUsername(username);
+
+  if (!user) {
+    notFound();
+  }
+
+  const posts = await getUserPosts(user.id);
   const dbUserId = await getDbUserId();
 
   if (!posts) {
