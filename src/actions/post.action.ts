@@ -72,7 +72,7 @@ export async function getPosts() {
 
     return posts;
   } catch (error) {
-    console.log("Error in getPosts", error);
+    console.error("Error in getPosts", error);
     throw new Error("Failed to fetch posts");
   }
 }
