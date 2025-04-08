@@ -29,7 +29,7 @@ export default function ProfileTabs({ username }: { username: string }) {
           key={tab.href}
           href={tab.href}
           className={cn(
-            "px-4 py-2 text-sm font-medium transition-colors relative",
+            "px-4 py-2 text-sm font-medium transition-colors relative w-full text-center",
             pathname === tab.href
               ? "text-primary border-b-2 border-primary -mb-px"
               : "text-muted-foreground hover:text-foreground"
