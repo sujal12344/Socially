@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useUser } from "@clerk/nextjs";
+import { SignInButton, useUser } from "@clerk/nextjs";
 import { formatUrlForDisplay } from "@/lib/utils";
 import { CalendarIcon, LinkIcon, MapPinIcon } from "lucide-react";
 import { format } from "date-fns";
@@ -95,23 +95,31 @@ export default function ProfileHeader({ username }: { username: string }) {
                 <p className="text-muted-foreground">@{profile.username}</p>
               </div>
 
-              {isLoaded && !isCurrentUser && (
-                <Button
-                  onClick={handleToggleFollow}
-                  variant={isFollowing ? "outline" : "default"}
-                  className={cn(
-                    isFollowing &&
-                      "hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
-                  )}
-                  disabled={isFollowLoading}
-                >
-                  {isFollowLoading
-                    ? "Loading..."
-                    : isFollowing
-                    ? "Following"
-                    : "Follow"}
-                </Button>
-              )}
+              {isLoaded &&
+                !isCurrentUser &&
+                (currentUser ? (
+                  <Button
+                    onClick={handleToggleFollow}
+                    variant={isFollowing ? "outline" : "default"}
+                    className={cn(
+                      isFollowing &&
+                        "hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
+                    )}
+                    disabled={isFollowLoading}
+                  >
+                    {isFollowLoading
+                      ? "Loading..."
+                      : isFollowing
+                      ? "Following"
+                      : "Follow"}
+                  </Button>
+                ) : (
+                  <SignInButton mode="modal">
+                    <Button size="sm" variant="default">
+                      Follow
+                    </Button>
+                  </SignInButton>
+                ))}
             </div>
 
             {profile.bio && (
