@@ -222,7 +222,7 @@ export async function getRandomUsers() {
           { NOT: { id: userId } }, // means do not include ourselves
           {
             NOT: {
-              following: {
+              followers: {
                 some: {
                   followingId: userId, // means do not include users that I already follow
                 },
