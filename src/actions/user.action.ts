@@ -87,9 +87,9 @@ export async function getUserFollowers(username: string) {
     if (!user) return null;
 
     const followers = await prisma.follows.findMany({
-      where: { followingId: user.id },
+      where: { followerId: user.id },
       select: {
-        follower: {
+        following: {
           select: {
             id: true,
             name: true,
@@ -109,9 +109,9 @@ export async function getUserFollowers(username: string) {
     // Get all users and fetch their isFollowing status in parallel
     const followersWithStatus = await Promise.all(
       followers.map(async (follow) => {
-        const isFollowingStatus = await isFollowing(follow.follower.id);
+        const isFollowingStatus = await isFollowing(follow.following.id);
         return {
-          ...follow.follower,
+          ...follow.following,
           isFollowing: isFollowingStatus,
         };
       })
@@ -135,9 +135,9 @@ export async function getUserFollowings(username: string) {
     if (!user) return null;
 
     const following = await prisma.follows.findMany({
-      where: { followerId: user.id },
+      where: { followingId: user.id },
       select: {
-        following: {
+        follower: {
           select: {
             id: true,
             name: true,
@@ -157,9 +157,9 @@ export async function getUserFollowings(username: string) {
     // Get all users and fetch their isFollowing status in parallel
     const followingWithStatus = await Promise.all(
       following.map(async (follow) => {
-        const isFollowingStatus = await isFollowing(follow.following.id);
+        const isFollowingStatus = await isFollowing(follow.follower.id);
         return {
-          ...follow.following,
+          ...follow.follower,
           isFollowing: isFollowingStatus,
         };
       })
@@ -222,9 +222,9 @@ export async function getRandomUsers() {
           { NOT: { id: userId } }, // means do not include ourselves
           {
             NOT: {
-              followers: {
+              following: {
                 some: {
-                  followerId: userId, // means do not include users that I already follow
+                  followingId: userId, // means do not include users that I already follow
                 },
               },
             },
@@ -270,8 +270,8 @@ export async function toggleFollow(targetUserId: string) {
     const existingFollow = await prisma.follows.findUnique({
       where: {
         followerId_followingId: {
-          followerId: userId,
-          followingId: targetUserId,
+          followerId: targetUserId,
+          followingId: userId,
         },
       },
     });
@@ -282,8 +282,8 @@ export async function toggleFollow(targetUserId: string) {
         // delete the follow if already follow and again click for unfollow
         where: {
           followerId_followingId: {
-            followerId: userId,
-            followingId: targetUserId,
+            followerId: targetUserId,
+            followingId: userId,
           },
         },
       });
@@ -294,8 +294,8 @@ export async function toggleFollow(targetUserId: string) {
         // create follow
         prisma.follows.create({
           data: {
-            followerId: userId,
-            followingId: targetUserId,
+            followerId: targetUserId,
+            followingId: userId, //kisne
           },
         }),
 
@@ -330,8 +330,8 @@ export async function isFollowedTargetUser(targetUserDBId: string) {
     const follow = await prisma.follows.findUnique({
       where: {
         followerId_followingId: {
-          followerId: currentUserDBId,
-          followingId: targetUserDBId,
+          followerId: targetUserDBId,
+          followingId: currentUserDBId,
         },
       },
     });

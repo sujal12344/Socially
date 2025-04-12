@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
       const followRecord = await prisma.follows.findUnique({
         where: {
           followerId_followingId: {
-            followerId: currentUserId,
-            followingId: user.id,
+            followerId: user.id,
+            followingId: currentUserId,
           },
         },
       });
