@@ -5,6 +5,7 @@ import {
   HomeIcon,
   LogOutIcon,
   MenuIcon,
+  MessageCircleIcon,
   MoonIcon,
   SunIcon,
   UserIcon,
@@ -22,7 +23,7 @@ import { useAuth, SignInButton, SignOutButton, useClerk } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 
-function MobileNavbar() {
+function MobileNavbar({ unreadCount }: { unreadCount: number }) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { isSignedIn } = useAuth();
   const { user } = useClerk();
@@ -70,6 +71,21 @@ function MobileNavbar() {
                   className="flex items-center gap-3 justify-start"
                   asChild
                 >
+                  <Link href="/messages" className="relative">
+                    <MessageCircleIcon className="w-4 h-4" />
+                    Message
+                    {unreadCount > 0 && (
+                      <span className="absolute top-2.5 right-10 h-4 w-4 rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    )}
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-3 justify-start"
+                  asChild
+                >
                   <Link href="/notifications">
                     <BellIcon className="w-4 h-4" />
                     Notifications
@@ -81,7 +97,7 @@ function MobileNavbar() {
                   asChild
                 >
                   <Link
-                    href={`/profile${
+                    href={`/profile/${
                       user?.emailAddresses[0].emailAddress.split("@")[0]
                     }`}
                   >
