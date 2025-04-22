@@ -42,6 +42,14 @@ model User {
   meessagesSent     Message[] @relation("sender") // one-to-many relation. A user can send many messages
   meessagesReceived Message[] @relation("receiver") // one-to-many relation. A user can receive many messages
 
+  // Friend Requests
+  sentFriendRequests     FriendRequest[] @relation("sentFriendRequests")
+  receivedFriendRequests FriendRequest[] @relation("receivedFriendRequests")
+
+  // FriendList & friendOf (many-to-many)
+  FriendList User[] @relation("UserFriends")
+  friendOf   User[] @relation("UserFriends")
+
   // Model level attributes/constraints
 }
 
@@ -190,4 +198,30 @@ enum NotificationType {
   COMMENT
   FOLLOW
   MESSAGE
+  FRIEND_REQUEST
+}
+
+model FriendRequest {
+  id         String        @id @default(cuid())
+  senderId   String
+  receiverId String
+  status     RequestStatus @default(PENDING)
+  message    String?
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  sender   User @relation("sentFriendRequests", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  receiver User @relation("receivedFriendRequests", fields: [receiverId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@index([senderId, receiverId])
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }
