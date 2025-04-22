@@ -279,3 +279,34 @@ export async function checkFriendshipStatus(friendId: string) {
     return { status: "none", error: "Failed to check friendship status" };
   }
 }
+
+export async function getFriendList() {
+  try {
+    const userId = await getDbUserId();
+    if (!userId) return null;
+
+    const friendList = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        friendList: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            image: true,
+            bio: true,
+          },
+        },
+      },
+    });
+
+    if (!friendList || friendList.friendList.length === 0) {
+      return [];
+    }
+
+    return friendList.friendList;
+  } catch (error) {
+    console.error("Error fetching friend list:", error);
+    return null;
+  }
+}
