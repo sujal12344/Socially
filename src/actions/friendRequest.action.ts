@@ -223,6 +223,10 @@ export async function getOutGoingFriendRequest() {
       },
     });
 
+    if (!friendRequest || friendRequest.length === 0) {
+      return [];
+    }
+
     return friendRequest;
   } catch (error) {
     console.error("Error fetching outgoing friend requests:", error);
