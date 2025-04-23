@@ -169,7 +169,7 @@ export async function rejectFriendRequest(requestId: string, message?: string) {
 export async function getIncomingFriendRequest() {
   try {
     const userId = await getDbUserId();
-    if (!userId) return null;
+    if (!userId) return [];
 
     const friendRequest = await prisma.friendRequest.findMany({
       where: {
@@ -198,14 +198,14 @@ export async function getIncomingFriendRequest() {
     return friendRequest;
   } catch (error) {
     console.error("Error fetching friend requests:", error);
-    return null;
+    return [];
   }
 }
 
 export async function getOutGoingFriendRequest() {
   try {
     const userId = await getDbUserId();
-    if (!userId) return null;
+    if (!userId) return [];
 
     const friendRequest = await prisma.friendRequest.findMany({
       where: {
@@ -234,7 +234,7 @@ export async function getOutGoingFriendRequest() {
     return friendRequest;
   } catch (error) {
     console.error("Error fetching outgoing friend requests:", error);
-    return null;
+    return [];
   }
 }
 
