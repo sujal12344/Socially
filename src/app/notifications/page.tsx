@@ -28,6 +28,8 @@ const getNotificationIcon = (type: string) => {
       return <UserPlusIcon className="size-4 text-green-500" />;
     case "MESSAGE":
       return <MessageCircleIcon className="size-4 text-purple-500" />;
+    case "FRIEND_REQUEST":
+      return <UserPlusIcon className="size-4 text-yellow-500" />;
     default:
       return null;
   }
@@ -110,15 +112,9 @@ function NotificationsPage() {
                           ? "commented on your post"
                           : notification.type === "MESSAGE"
                           ? "sent you a message"
+                          : notification.type === "FRIEND_REQUEST"
+                          ? "sent you a friend request"
                           : ""}
-                        {/* {notification.type === "MESSAGE" && (
-                          <Link
-                            href={`/chat/${notification.creator.username}`}
-                            className="text-md text-muted-foreground hover:underline"
-                          >
-                            {` "${notification.message?.content}"`}
-                          </Link>
-                        )} */}
                       </span>
                     </div>
 
