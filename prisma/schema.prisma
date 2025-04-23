@@ -47,7 +47,7 @@ model User {
   receivedFriendRequests FriendRequest[] @relation("receivedFriendRequests")
 
   // FriendList & friendOf (many-to-many)
-  FriendList User[] @relation("UserFriends")
+  friendList User[] @relation("UserFriends")
   friendOf   User[] @relation("UserFriends")
 
   // Model level attributes/constraints
@@ -170,10 +170,10 @@ model Notification {
   read      Boolean          @default(false)
 
   // Optional fields
-  postId    String?
-  commentId String?
-  messageId String?
-  content   String?
+  postId          String?
+  commentId       String?
+  messageId       String?
+  friendRequestId String?
 
   // timestamps
   createdAt DateTime @default(now())
@@ -185,9 +185,10 @@ model Notification {
   creator User @relation("notificationCreator", fields: [creatorId], references: [id], onDelete: Cascade, onUpdate: Cascade) // One-to-many relation. A user can create many notifications
 
   // One-to-one relation
-  post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade) // One-to-one relation. A notification can be related to one post
-  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade) // One-to-one relation. A notification can be related to one comment
-  message Message? @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: Cascade) // One-to-one relation. A notification can be related to one message
+  post          Post?          @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade) // One-to-one relation. A notification can be related to one post
+  comment       Comment?       @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade) // One-to-one relation. A notification can be related to one comment
+  message       Message?       @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: Cascade) // One-to-one relation. A notification can be related to one message
+  friendRequest FriendRequest? @relation(fields: [friendRequestId], references: [id], onDelete: Cascade, onUpdate: Cascade) // One-to-one relation. A notification can be related to one friend request
 
   // Model level attributes/constraints
   @@index([userId, createdAt])
@@ -206,15 +207,17 @@ model FriendRequest {
   senderId   String
   receiverId String
   status     RequestStatus @default(PENDING)
-  message    String?
+  reqMsg     String?
+  resMesg    String?
 
   // timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  sender   User @relation("sentFriendRequests", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  receiver User @relation("receivedFriendRequests", fields: [receiverId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  sender       User           @relation("sentFriendRequests", fields: [senderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  receiver     User           @relation("receivedFriendRequests", fields: [receiverId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Notification Notification[]
 
   @@unique([senderId, receiverId])
   @@index([senderId, receiverId])
