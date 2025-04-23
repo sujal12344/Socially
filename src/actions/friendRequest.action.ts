@@ -191,6 +191,10 @@ export async function getIncomingFriendRequest() {
       },
     });
 
+    if (!friendRequest || friendRequest.length === 0) {
+      return [];
+    }
+
     return friendRequest;
   } catch (error) {
     console.error("Error fetching friend requests:", error);
