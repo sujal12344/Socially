@@ -9,18 +9,10 @@ import FriendList from "./components/FriendList";
 import OutgoingRequests from "./components/OutgoingRequests";
 import IncomingRequests from "./components/IncomingRequests";
 import FriendsSkeleton from "./components/FriendsSkeleton";
-// import { redirect } from "next/navigation";
-// import { useAuth } from "@clerk/nextjs";
 
 export const dynamic = "force-dynamic";
 
 export default async function FriendsPage() {
-  // const { userId } = useAuth();
-
-  // if (!userId) {
-  //   redirect("/sign-in");
-  // }
-
   // Fetch friend requests data
   const outgoingRequests = await getOutGoingFriendRequest();
   const incomingRequests = await getIncomingFriendRequest();
