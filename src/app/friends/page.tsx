@@ -9,17 +9,25 @@ import FriendList from "./components/FriendList";
 import OutgoingRequests from "./components/OutgoingRequests";
 import IncomingRequests from "./components/IncomingRequests";
 import FriendsSkeleton from "./components/FriendsSkeleton";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function FriendsPage() {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
   // Fetch friend requests data
   const outgoingRequests = await getOutGoingFriendRequest();
   const incomingRequests = await getIncomingFriendRequest();
 
   // Count for badge indicators
-  const outgoingCount = outgoingRequests?.length || 0;
-  const incomingCount = incomingRequests?.length || 0;
+  const outgoingCount = outgoingRequests.length;
+  const incomingCount = incomingRequests.length;
 
   return (
     <Tabs defaultValue="friends" className="w-full">
