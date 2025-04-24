@@ -44,6 +44,7 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 type User = Awaited<ReturnType<typeof getProfileByUsername>>;
 type Posts = Awaited<ReturnType<typeof getUserPosts>>;
@@ -62,6 +63,7 @@ export default function ProfilePageClient({
   user,
 }: ProfilePageClientProps) {
   const { user: currentUser } = useUser();
+  const router = useRouter();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isUpdatingFollow, setIsUpdatingFollow] = useState(false);
@@ -108,29 +110,46 @@ export default function ProfilePageClient({
     if (!currentUser) return;
 
     setIsUpdatingFriendRequest(true);
-    try {
-      if (friendStatus === "pending" || friendStatus === "none") {
-        const result = await toggleFriendRequest(user.id);
 
-        if (result?.success) {
-          setFriendStatus(friendStatus === "none" ? "pending" : "none");
-          toast.success(
-            friendStatus === "none"
-              ? "Friend request sent"
-              : "Friend request cancelled"
-          );
-        }
-      } else if (friendStatus === "received") {
-        const result = await acceptFriendRequest(user.id);
-        if (result?.success) {
-          setFriendStatus("friends");
-          toast.success("Friend request accepted");
-        }
-      } else if (friendStatus === "friends") {
-        // Handle unfriend logic if needed
-        toast.error("You are already friends");
+    try {
+      switch (friendStatus) {
+        case "none":
+          // Send new friend request
+          const sendResult = await toggleFriendRequest(user.id);
+          if (sendResult?.success) {
+            setFriendStatus("pending");
+            toast.success("Friend request sent");
+          }
+          break;
+
+        case "pending":
+          // Cancel existing request
+          const cancelResult = await toggleFriendRequest(user.id);
+          if (cancelResult?.success) {
+            setFriendStatus("none");
+            toast.success("Friend request cancelled");
+          }
+          break;
+
+        case "received":
+          // Accept incoming request
+          const acceptResult = await acceptFriendRequest(user.id);
+          if (acceptResult?.success) {
+            setFriendStatus("friends");
+            toast.success("Friend request accepted");
+          }
+          break;
+
+        case "friends":
+          // Already friends - could implement unfriend functionality here
+          toast.success("You are already friends");
+          break;
+
+        default:
+          toast.error("Unknown friendship status");
       }
     } catch (error) {
+      console.error("Friend request error:", error);
       toast.error("Failed to update friend request");
     } finally {
       setIsUpdatingFriendRequest(false);
@@ -175,6 +194,85 @@ export default function ProfilePageClient({
   }, [currentUser, isOwnProfile, user.id]);
 
   const formattedDate = format(new Date(user.createdAt), "MMMM yyyy");
+
+  const renderProfileActions = () => {
+    if (!currentUser) {
+      return (
+        <SignInButton mode="modal">
+          <Button className="w-full mt-4">Follow</Button>
+        </SignInButton>
+      );
+    }
+
+    if (isOwnProfile) {
+      return (
+        <Button className="w-full mt-4" onClick={() => setShowEditDialog(true)}>
+          <EditIcon className="size-4 mr-2" />
+          Edit Profile
+        </Button>
+      );
+    }
+
+    return (
+      <div className="w-full mt-4 grid grid-cols-2 gap-2">
+        <Button
+          onClick={handleFollow}
+          disabled={isUpdatingFollow}
+          variant={isFollowing ? "outline" : "default"}
+        >
+          {isFollowing ? "Unfollow" : "Follow"}
+        </Button>
+
+        {renderFriendshipButton()}
+      </div>
+    );
+  };
+
+  const renderFriendshipButton = () => {
+    const buttonConfig = {
+      friends: {
+        variant: "secondary" as const,
+        icon: <MessageSquareIcon className="size-4 mr-2" />,
+        label: "Message",
+        onClick: () => router.push(`/chat/${user.username}`),
+        disabled: false,
+      },
+      pending: {
+        variant: "outline" as const,
+        icon: <UserMinusIcon className="size-4 mr-2" />,
+        label: "Cancel Request",
+        onClick: handleFriendRequest,
+        disabled: isUpdatingFriendRequest,
+      },
+      received: {
+        variant: "default" as const,
+        icon: <UserCheckIcon className="size-4 mr-2" />,
+        label: "Accept Request",
+        onClick: handleFriendRequest,
+        disabled: isUpdatingFriendRequest,
+      },
+      none: {
+        variant: "secondary" as const,
+        icon: <UserPlusIcon className="size-4 mr-2" />,
+        label: "Add Friend",
+        onClick: handleFriendRequest,
+        disabled: isUpdatingFriendRequest,
+      },
+    };
+
+    const config = buttonConfig[friendStatus];
+
+    return (
+      <Button
+        variant={config.variant}
+        onClick={config.onClick}
+        disabled={config.disabled}
+      >
+        {config.icon}
+        {config.label}
+      </Button>
+    );
+  };
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -223,68 +321,7 @@ export default function ProfilePageClient({
                 </div>
 
                 {/* "FOLLOW & EDIT PROFILE" BUTTONS */}
-                {!currentUser ? (
-                  <SignInButton mode="modal">
-                    <Button className="w-full mt-4">Follow</Button>
-                  </SignInButton>
-                ) : isOwnProfile ? (
-                  <Button
-                    className="w-full mt-4"
-                    onClick={() => setShowEditDialog(true)}
-                  >
-                    <EditIcon className="size-4 mr-2" />
-                    Edit Profile
-                  </Button>
-                ) : (
-                  <div className="w-full mt-4 grid grid-cols-2 gap-2">
-                    <Button
-                      onClick={handleFollow}
-                      disabled={isUpdatingFollow}
-                      variant={isFollowing ? "outline" : "default"}
-                    >
-                      {isFollowing ? "Unfollow" : "Follow"}
-                    </Button>
-
-                    {friendStatus === "friends" ? (
-                      <Button
-                        variant="secondary"
-                        onClick={() =>
-                          (window.location.href = `/chat/${user.username}`)
-                        }
-                      >
-                        <MessageSquareIcon className="size-4 mr-2" />
-                        Message
-                      </Button>
-                    ) : friendStatus === "pending" ? (
-                      <Button
-                        variant="outline"
-                        onClick={handleFriendRequest}
-                        disabled={isUpdatingFriendRequest}
-                      >
-                        <UserMinusIcon className="size-4 mr-2" />
-                        Cancel Request
-                      </Button>
-                    ) : friendStatus === "none" ? (
-                      <Button
-                        variant="secondary"
-                        onClick={handleFriendRequest}
-                        disabled={isUpdatingFriendRequest}
-                      >
-                        <UserPlusIcon className="size-4 mr-2" />
-                        Add Friend
-                      </Button>
-                    ) : friendStatus === "received" ? (
-                      <Button
-                        variant="outline"
-                        onClick={handleFriendRequest}
-                        disabled={isUpdatingFriendRequest}
-                      >
-                        <UserCheckIcon className="size-4 mr-2" />
-                        Accept Request
-                      </Button>
-                    ) : null}
-                  </div>
-                )}
+                {renderProfileActions()}
 
                 {/* LOCATION & WEBSITE */}
                 <div className="w-full mt-6 space-y-2 text-sm">
