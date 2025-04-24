@@ -4,6 +4,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   acceptFriendRequest,
+  getIncomingFriendRequest,
   rejectFriendRequest,
 } from "@/actions/friendRequest.action";
 import { CheckIcon, XIcon } from "lucide-react";
@@ -11,10 +12,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+type IncomingReuestsType = Awaited<ReturnType<typeof getIncomingFriendRequest>>;
+
 export default function IncomingRequests({
   requests = [],
 }: {
-  requests: any[];
+  requests: IncomingReuestsType;
 }) {
   const router = useRouter();
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());

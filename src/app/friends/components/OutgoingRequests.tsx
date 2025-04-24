@@ -2,16 +2,21 @@
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { toggleFriendRequest } from "@/actions/friendRequest.action";
+import {
+  getOutGoingFriendRequest,
+  toggleFriendRequest,
+} from "@/actions/friendRequest.action";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+type OutGoingFriendRequestsType = Awaited<ReturnType<typeof getOutGoingFriendRequest>>;
+
 export default function OutgoingRequests({
   requests = [],
 }: {
-  requests: any[];
+  requests: OutGoingFriendRequestsType;
 }) {
   const router = useRouter();
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());

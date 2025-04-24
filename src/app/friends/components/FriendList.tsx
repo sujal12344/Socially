@@ -9,7 +9,9 @@ import { useRouter } from "next/navigation";
 import { getFriendList } from "@/actions/friendRequest.action";
 
 export default function FriendList() {
-  const [friends, setFriends] = useState<any[]>([]);
+  type FriendsType = Awaited<ReturnType<typeof getFriendList>>;
+
+  const [friends, setFriends] = useState<FriendsType>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -18,7 +20,7 @@ export default function FriendList() {
       setIsLoading(true);
       try {
         const response = await getFriendList();
-        setFriends(response || []);
+        setFriends(response);
       } catch (error) {
         console.error("Failed to load friends", error);
       } finally {
