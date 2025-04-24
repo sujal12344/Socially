@@ -291,7 +291,7 @@ export async function checkFriendshipStatus(friendId: string) {
 export async function getFriendList() {
   try {
     const userId = await getDbUserId();
-    if (!userId) return null;
+    if (!userId) return [];
 
     const friendList = await prisma.user.findUnique({
       where: { id: userId },
@@ -315,6 +315,6 @@ export async function getFriendList() {
     return friendList.friendList;
   } catch (error) {
     console.error("Error fetching friend list:", error);
-    return null;
+    return [];
   }
 }
