@@ -1,6 +1,11 @@
 "use client";
 
 import { toggleFollow } from "@/actions/user.action";
+import { 
+  acceptFriendRequest, 
+  checkFriendshipStatus, 
+  toggleFriendRequest 
+} from "@/actions/friendRequest.action";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,9 +18,12 @@ import {
   LinkIcon,
   MapPinIcon,
   MessageCircleIcon,
+  UserPlusIcon,
+  UserMinusIcon,
+  UserCheckIcon,
 } from "lucide-react";
 import { format } from "date-fns";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
@@ -25,9 +33,13 @@ export default function ProfileHeader({ username }: { username: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isFollowLoading, setIsFollowLoading] = useState(false);
+  const [friendStatus, setFriendStatus] = useState<
+    "none" | "pending" | "received" | "friends"
+  >("none");
+  const [isUpdatingFriendRequest, setIsUpdatingFriendRequest] = useState(false);
 
   // Fetch profile data on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchProfile() {
       try {
         const response = await fetch(`/api/profile?username=${username}`);
@@ -46,6 +58,37 @@ export default function ProfileHeader({ username }: { username: string }) {
 
     fetchProfile();
   }, [username]);
+
+  // Check friendship status on component mount
+  useEffect(() => {
+    const checkFriendship = async () => {
+      if (!profile || !currentUser || isCurrentUser()) return;
+      
+      try {
+        const result = await checkFriendshipStatus(profile.id);
+        if (!result) {
+          setFriendStatus("none");
+          return;
+        }
+        
+        const status = result.status;
+        if (
+          status === "none" ||
+          status === "pending" ||
+          status === "received" ||
+          status === "friends"
+        ) {
+          setFriendStatus(status);
+        } else {
+          setFriendStatus("none");
+        }
+      } catch (error) {
+        console.error("Failed to check friendship status:", error);
+      }
+    };
+    
+    checkFriendship();
+  }, [profile, currentUser]);
 
   async function handleToggleFollow() {
     if (!profile) return;
@@ -66,6 +109,112 @@ export default function ProfileHeader({ username }: { username: string }) {
     }
   }
 
+  async function handleFriendRequest() {
+    if (!profile || !currentUser) return;
+    
+    setIsUpdatingFriendRequest(true);
+    try {
+      switch (friendStatus) {
+        case "none":
+          // Send new friend request
+          const sendResult = await toggleFriendRequest(profile.id);
+          if (sendResult?.success) {
+            setFriendStatus("pending");
+            toast.success("Friend request sent");
+          }
+          break;
+          
+        case "pending":
+          // Cancel existing request
+          const cancelResult = await toggleFriendRequest(profile.id);
+          if (cancelResult?.success) {
+            setFriendStatus("none");
+            toast.success("Friend request cancelled");
+          }
+          break;
+          
+        case "received":
+          // Accept incoming request
+          const acceptResult = await acceptFriendRequest(profile.id);
+          if (acceptResult?.success) {
+            setFriendStatus("friends");
+            toast.success("Friend request accepted");
+          }
+          break;
+        case "friends":
+          // Already friends - could implement unfriend functionality here
+          toast.success("You are already friends");
+          break;
+  
+        default:
+          toast.error("Unknown friendship status");
+      }
+    } catch (error) {
+      console.error("Friend request error:", error);
+      toast.error("Failed to update friend request");
+    } finally {
+      setIsUpdatingFriendRequest(false);
+    }
+  }
+  
+  function isCurrentUser() {
+    return currentUser?.emailAddresses[0].emailAddress.split("@")[0] === username;
+  }
+
+  function renderFriendshipButton() {
+    const buttonConfig = {
+      friends: {
+        component: (
+          <Button asChild variant="outline">
+            <Link href={`/chat/${profile.username}`}>
+              <MessageCircleIcon className="mr-2 h-4 w-4" />
+              Message
+            </Link>
+          </Button>
+        )
+      },
+      pending: {
+        component: (
+          <Button 
+            variant="outline"
+            onClick={handleFriendRequest}
+            disabled={isUpdatingFriendRequest}
+            className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive"
+          >
+            <UserMinusIcon className="mr-2 h-4 w-4" />
+            Cancel Request
+          </Button>
+        )
+      },
+      received: {
+        component: (
+          <Button 
+            variant="default"
+            onClick={handleFriendRequest}
+            disabled={isUpdatingFriendRequest}
+          >
+            <UserCheckIcon className="mr-2 h-4 w-4" />
+            Accept Request
+          </Button>
+        )
+      },
+      none: {
+        component: (
+          <Button 
+            variant="outline"
+            onClick={handleFriendRequest}
+            disabled={isUpdatingFriendRequest}
+          >
+            <UserPlusIcon className="mr-2 h-4 w-4" />
+            Add Friend
+          </Button>
+        )
+      }
+    };
+    
+    return buttonConfig[friendStatus].component;
+  }
+
   if (isLoading) {
     return <ProfileHeaderSkeleton />;
   }
@@ -78,12 +227,10 @@ export default function ProfileHeader({ username }: { username: string }) {
     );
   }
 
-  const isCurrentUser =
-    currentUser?.emailAddresses[0].emailAddress.split("@")[0] === username;
-
   return (
     <Card className="border-0 shadow-none bg-transparent md:bg-card">
       <CardContent className="p-0 md:p-6">
+        {/* Profile avatar and content */}
         <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
           <Avatar className="w-20 h-20 md:w-24 md:h-24">
             <AvatarImage
@@ -102,7 +249,7 @@ export default function ProfileHeader({ username }: { username: string }) {
               </div>
 
               {isLoaded &&
-                !isCurrentUser &&
+                !isCurrentUser() &&
                 (currentUser ? (
                   <div className="flex gap-2">
                     <Button
@@ -121,12 +268,7 @@ export default function ProfileHeader({ username }: { username: string }) {
                         : "Follow"}
                     </Button>
 
-                    <Button asChild variant="outline">
-                      <Link href={`/chat/${profile.username}`}>
-                        <MessageCircleIcon className="mr-2 h-4 w-4" />
-                        Message
-                      </Link>
-                    </Button>
+                    {renderFriendshipButton()}
                   </div>
                 ) : (
                   <SignInButton mode="modal">
