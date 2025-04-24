@@ -124,7 +124,7 @@ export async function getUserFollowers(username: string) {
       })
     );
 
-    revalidatePath(`/profile/${username}/followers`);
+    // revalidatePath(`/profile/${username}/followers`);
     return followersWithStatus;
   } catch (error) {
     console.error("Error fetching user followers:", error);
@@ -179,7 +179,7 @@ export async function getUserFollowings(username: string) {
       })
     );
 
-    revalidatePath(`/profile/${username}/followings`);
+    // revalidatePath(`/profile/${username}/followings`);
     return followingWithStatus;
   } catch (error) {
     console.error("Error fetching user following:", error);
@@ -195,7 +195,7 @@ export async function getDbUserId() {
 
   if (!user) throw new Error("User not found");
 
-  revalidatePath("/");
+  // revalidatePath("/");
 
   return user.id;
 }
@@ -225,7 +225,7 @@ export async function getRandomUsers() {
         },
         take: 3,
       });
-      revalidatePath("/");
+      // revalidatePath("/");
       return popularUsers;
     }
 
@@ -264,7 +264,7 @@ export async function getRandomUsers() {
       take: 3,
     });
 
-    revalidatePath("/");
+    // revalidatePath("/");
 
     return randomUsers;
   } catch (error) {
@@ -291,21 +291,28 @@ export async function toggleFollow(targetUserId: string) {
     });
 
     if (existingFollow) {
-      // unfollow
-      await prisma.follows.delete({
-        // delete the follow if already follow and again click for unfollow
-        where: {
-          followerId_followingId: {
-            followerId: targetUserId,
-            followingId: userId,
+      await prisma.$transaction([
+        prisma.follows.delete({
+          // delete the follow if already follow and again click for unfollow
+          where: {
+            followerId_followingId: {
+              followerId: targetUserId,
+              followingId: userId,
+            },
           },
-        },
-      });
+        }),
+        prisma.notification.deleteMany({
+          where: {
+            type: "FOLLOW",
+            userId: targetUserId,
+            creatorId: userId,
+          },
+        }),
+      ]);
     } else {
       // follow and create the follow and notification in a transaction
       await prisma.$transaction([
         // transaction to ensure both operations are done or none (I mean ya to dono hoga ya fir koi nahi)
-        // create follow
         prisma.follows.create({
           data: {
             followerId: targetUserId,
@@ -324,7 +331,7 @@ export async function toggleFollow(targetUserId: string) {
       ]);
     }
 
-    revalidatePath("/");
+    // revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.log("Error in toggleFollow", error);
@@ -350,7 +357,7 @@ export async function isFollowedTargetUser(targetUserDBId: string) {
       },
     });
 
-    revalidatePath("/");
+    // revalidatePath("/");
 
     return !!follow;
   } catch (error) {
