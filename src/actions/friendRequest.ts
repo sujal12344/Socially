@@ -1,3 +1,5 @@
+"use server";
+
 import prisma from "@/lib/prisma";
 import { getDbUserId } from "./user.action";
 
@@ -57,14 +59,17 @@ export async function toggleFriendRequest(
   }
 }
 
-export async function acceptFriendRequest(requestId: string, message?: string) {
+export async function acceptFriendRequest(senderId: string, message?: string) {
   try {
     const userId = await getDbUserId();
     if (!userId) return null;
 
     const friendRequest = await prisma.friendRequest.findUnique({
       where: {
-        id: requestId, // Assuming requestId is unique
+        senderId_receiverId: {
+          senderId,
+          receiverId: userId,
+        },
       },
     });
 
@@ -79,7 +84,10 @@ export async function acceptFriendRequest(requestId: string, message?: string) {
     await prisma.$transaction([
       prisma.friendRequest.update({
         where: {
-          id: requestId,
+          senderId_receiverId: {
+            senderId,
+            receiverId: userId,
+          },
         },
         data: {
           status: "ACCEPTED",
@@ -219,5 +227,55 @@ export async function getOutGoingFriendRequest() {
   } catch (error) {
     console.error("Error fetching outgoing friend requests:", error);
     return null;
+  }
+}
+
+export async function checkFriendshipStatus(friendId: string) {
+  try {
+    const currentUserId = await getDbUserId();
+    if (!currentUserId) return { status: "none", error: "User not found" };
+
+    // Check if they're friends
+    const areFriends = await prisma.user.findFirst({
+      where: {
+        id: currentUserId,
+        friendList: {
+          some: {
+            id: friendId,
+          },
+        },
+      },
+    });
+    if (areFriends) {
+      return { status: "friends", message: "You are friends" };
+    }
+
+    // Check pending requests
+    const pendingRequest = await prisma.friendRequest.findFirst({
+      where: {
+        senderId: currentUserId,
+        receiverId: friendId,
+        status: "PENDING",
+      },
+    });
+    if (pendingRequest) {
+      return { status: "pending", message: "Friend request is pending" };
+    }
+
+    const pendingRequestReceived = await prisma.friendRequest.findFirst({
+      where: {
+        senderId: friendId,
+        receiverId: currentUserId,
+        status: "PENDING",
+      },
+    });
+    if (pendingRequestReceived) {
+      return { status: "received", message: "Friend request received" };
+    }
+
+    return { status: "none", message: "No friendship status found" };
+  } catch (error) {
+    console.error("Error checking friendship status:", error);
+    return { status: "none", error: "Failed to check friendship status" };
   }
 }
