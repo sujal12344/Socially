@@ -6,6 +6,11 @@ import {
   updateProfile,
 } from "@/actions/profile.action";
 import { toggleFollow } from "@/actions/user.action";
+import {
+  acceptFriendRequest,
+  checkFriendshipStatus,
+  toggleFriendRequest,
+} from "@/actions/friendRequest";
 import PostCard from "@/components/PostCard";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -31,10 +36,13 @@ import {
   HeartIcon,
   LinkIcon,
   MapPinIcon,
+  UserPlusIcon,
+  UserMinusIcon,
+  MessageSquareIcon,
+  UserCheckIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 type User = Awaited<ReturnType<typeof getProfileByUsername>>;
@@ -57,6 +65,10 @@ export default function ProfilePageClient({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isUpdatingFollow, setIsUpdatingFollow] = useState(false);
+  const [friendStatus, setFriendStatus] = useState<
+    "none" | "pending" | "received" | "friends"
+  >("none");
+  const [isUpdatingFriendRequest, setIsUpdatingFriendRequest] = useState(false);
 
   const [editForm, setEditForm] = useState({
     name: user.name || "",
@@ -92,12 +104,77 @@ export default function ProfilePageClient({
     }
   };
 
+  const handleFriendRequest = async () => {
+    if (!currentUser) return;
+
+    setIsUpdatingFriendRequest(true);
+    try {
+      if (friendStatus === "pending" || friendStatus === "none") {
+        const result = await toggleFriendRequest(user.id);
+
+        if (result?.success) {
+          setFriendStatus(friendStatus === "none" ? "pending" : "none");
+          toast.success(
+            friendStatus === "none"
+              ? "Friend request sent"
+              : "Friend request cancelled"
+          );
+        }
+      } else if (friendStatus === "received") {
+        const result = await acceptFriendRequest(user.id);
+        if (result?.success) {
+          setFriendStatus("friends");
+          toast.success("Friend request accepted");
+        }
+      } else if (friendStatus === "friends") {
+        // Handle unfriend logic if needed
+        toast.error("You are already friends");
+      }
+    } catch (error) {
+      toast.error("Failed to update friend request");
+    } finally {
+      setIsUpdatingFriendRequest(false);
+    }
+  };
+
   const isOwnProfile =
     currentUser?.username === user.username ||
     currentUser?.emailAddresses[0].emailAddress.split("@")[0] === user.username;
 
+  useEffect(() => {
+    const checkFriendship = async () => {
+      if (!currentUser || isOwnProfile) return;
+
+      try {
+        const result = await checkFriendshipStatus(user.id);
+        if (!result) {
+          setFriendStatus("none");
+          return;
+        }
+
+        // Add type validation before setting state
+        const status = result.status;
+        if (
+          status === "none" ||
+          status === "pending" ||
+          status === "received" ||
+          status === "friends"
+        ) {
+          setFriendStatus(status);
+        } else {
+          // Default to "none" if unexpected status received
+          setFriendStatus("none");
+          console.error("Unexpected friendship status:", status);
+        }
+      } catch (error) {
+        console.error("Failed to check friendship status:", error);
+      }
+    };
+
+    checkFriendship();
+  }, [currentUser, isOwnProfile, user.id]);
+
   const formattedDate = format(new Date(user.createdAt), "MMMM yyyy");
-  const router = useRouter();
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -167,12 +244,45 @@ export default function ProfilePageClient({
                     >
                       {isFollowing ? "Unfollow" : "Follow"}
                     </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => router.push(`/chat/${user.username}`)}
-                    >
-                      Message
-                    </Button>
+
+                    {friendStatus === "friends" ? (
+                      <Button
+                        variant="secondary"
+                        onClick={() =>
+                          (window.location.href = `/chat/${user.username}`)
+                        }
+                      >
+                        <MessageSquareIcon className="size-4 mr-2" />
+                        Message
+                      </Button>
+                    ) : friendStatus === "pending" ? (
+                      <Button
+                        variant="outline"
+                        onClick={handleFriendRequest}
+                        disabled={isUpdatingFriendRequest}
+                      >
+                        <UserMinusIcon className="size-4 mr-2" />
+                        Cancel Request
+                      </Button>
+                    ) : friendStatus === "none" ? (
+                      <Button
+                        variant="secondary"
+                        onClick={handleFriendRequest}
+                        disabled={isUpdatingFriendRequest}
+                      >
+                        <UserPlusIcon className="size-4 mr-2" />
+                        Add Friend
+                      </Button>
+                    ) : friendStatus === "received" ? (
+                      <Button
+                        variant="outline"
+                        onClick={handleFriendRequest}
+                        disabled={isUpdatingFriendRequest}
+                      >
+                        <UserCheckIcon className="size-4 mr-2" />
+                        Accept Request
+                      </Button>
+                    ) : null}
                   </div>
                 )}
 
