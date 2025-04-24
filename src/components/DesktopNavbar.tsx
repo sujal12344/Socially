@@ -1,4 +1,10 @@
-import { BellIcon, HomeIcon, MessageCircleIcon, UserIcon } from "lucide-react";
+import {
+  BellIcon,
+  HomeIcon,
+  MessageCircleIcon,
+  UserIcon,
+  Users,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SignInButton, UserButton } from "@clerk/nextjs";
@@ -33,9 +39,25 @@ async function DesktopNavbar({ unreadCount }: { unreadCount: number }) {
             </Link>
           </Button>
           <Button variant="ghost" className="flex items-center gap-2" asChild>
-            <Link href="/notifications">
+            <Link href="/notifications" className="relative">
               <BellIcon className="w-4 h-4" />
               <span className="hidden lg:inline">Notifications</span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </Link>
+          </Button>
+          <Button variant="ghost" className="flex items-center gap-2" asChild>
+            <Link href="/friends" className="relative">
+              <Users className="h-5 w-5" />
+              <span className="hidden lg:inline ml-1">Friends</span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </Link>
           </Button>
           <Button variant="ghost" className="flex items-center gap-2" asChild>
