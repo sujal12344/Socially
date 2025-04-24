@@ -1,6 +1,6 @@
 "use client";
 
-import { checkFriendshipStatus } from "@/actions/friendRequest";
+import { checkFriendshipStatus } from "@/actions/friendRequest.action";
 import { getMessages, sendMessage } from "@/actions/message.action";
 import { getUserByUsername } from "@/actions/user.action";
 import { Button } from "@/components/ui/button";

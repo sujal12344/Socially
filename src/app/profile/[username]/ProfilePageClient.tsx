@@ -10,7 +10,7 @@ import {
   acceptFriendRequest,
   checkFriendshipStatus,
   toggleFriendRequest,
-} from "@/actions/friendRequest";
+} from "@/actions/friendRequest.action";
 import PostCard from "@/components/PostCard";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
