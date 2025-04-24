@@ -42,6 +42,13 @@ export async function getNotifications() {
             createdAt: true,
           },
         },
+        friendRequest: {
+          select: {
+            id: true,
+            status: true,
+            createdAt: true,
+          },
+        },
       },
       orderBy: {
         createdAt: "desc",
