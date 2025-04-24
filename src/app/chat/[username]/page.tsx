@@ -1,13 +1,15 @@
 "use client";
 
+import { checkFriendshipStatus } from "@/actions/friendRequest";
 import { getMessages, sendMessage } from "@/actions/message.action";
+import { getUserByUsername } from "@/actions/user.action";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { format } from "date-fns";
 import { SendIcon } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -35,6 +37,23 @@ export default function ChatPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkFriendship = async () => {
+      const userInfo = await getUserByUsername(username);
+      const result = await checkFriendshipStatus(userInfo?.id as string);
+      if (result.status !== "friends") {
+        router.push(`/profile/${username}`);
+        toast.error(
+          "You both are not friends yet. Please send a friend request first."
+        );
+        return;
+      }
+    };
+    checkFriendship();
+  }, []);
 
   // Fetch messages on load
   useEffect(() => {
