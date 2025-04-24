@@ -1,7 +1,10 @@
 import prisma from "@/lib/prisma";
 import { getDbUserId } from "./user.action";
 
-export async function sendFriendRequest(receiverId: string, message?: string) {
+export async function toggleFriendRequest(
+  receiverId: string,
+  message?: string
+) {
   try {
     const userId = await getDbUserId();
     if (!userId) return null;
@@ -14,27 +17,40 @@ export async function sendFriendRequest(receiverId: string, message?: string) {
     });
 
     if (existingRequest) {
-      return { error: "Friend request already sent" };
+      await prisma.$transaction([
+        prisma.friendRequest.delete({
+          where: {
+            id: existingRequest.id,
+          },
+        }),
+        prisma.notification.deleteMany({
+          where: {
+            type: "FRIEND_REQUEST",
+            userId: receiverId,
+            creatorId: userId,
+          },
+        }),
+      ]);
+      return { success: true, message: "Friend request removed" };
+    } else {
+      await prisma.$transaction([
+        prisma.friendRequest.create({
+          data: {
+            senderId: userId,
+            receiverId,
+            reqMsg: message || null,
+          },
+        }),
+        prisma.notification.create({
+          data: {
+            type: "FRIEND_REQUEST",
+            userId: receiverId,
+            creatorId: userId,
+          },
+        }),
+      ]);
+      return { success: true, message: "Friend request sent" };
     }
-
-    await prisma.$transaction([
-      prisma.friendRequest.create({
-        data: {
-          senderId: userId,
-          receiverId,
-          reqMsg: message || null,
-        },
-      }),
-      prisma.notification.create({
-        data: {
-          type: "FRIEND_REQUEST",
-          userId: receiverId,
-          creatorId: userId,
-        },
-      }),
-    ]);
-
-    return { success: true, message: "Friend request sent" };
   } catch (error) {
     console.error("Error sending friend request:", error);
     return null;
