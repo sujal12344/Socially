@@ -172,7 +172,7 @@ export async function sendMessage(receiverUsername: string, content: string) {
           userId: receiver.id,
           creatorId: senderId,
           messageId: message.id,
-          content: content.trim(),
+          // content: content.trim(),
         },
       });
 
