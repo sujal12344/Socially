@@ -18,7 +18,7 @@ export async function createPost(content: string, image: string) {
       },
     });
 
-    revalidatePath("/"); // purge the cache for the home page
+    // revalidatePath("/"); // purge the cache for the home page
     return { success: true, post };
   } catch (error) {
     console.error("Failed to create post:", error);
@@ -144,7 +144,7 @@ export async function toggleLike(postId: string) {
       ]);
     }
 
-    revalidatePath("/");
+    // revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.error("Failed to toggle like:", error);
@@ -193,7 +193,7 @@ export async function createComment(postId: string, content: string) {
       return [newComment];
     });
 
-    revalidatePath(`/`);
+    // revalidatePath(`/`);
     return { success: true, comment };
   } catch (error) {
     console.error("Failed to create comment:", error);
@@ -218,7 +218,7 @@ export async function deletePost(postId: string) {
       where: { id: postId },
     });
 
-    revalidatePath("/"); // purge the cache
+    // revalidatePath("/"); // purge the cache
     return { success: true };
   } catch (error) {
     console.error("Failed to delete post:", error);

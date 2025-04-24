@@ -62,7 +62,7 @@ export async function getConversations() {
       new Map(formattedConversations.map((item) => [item.otherUser.id, item]))
     ).map(([, item]) => item);
 
-    revalidatePath("/chat");
+    // revalidatePath("/chat");
     return uniqueConversations;
   } catch (error) {
     console.error("Error fetching conversations:", error);
