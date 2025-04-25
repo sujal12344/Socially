@@ -8,8 +8,6 @@ import { NotificationsSkeleton } from "@/components/NotificationSkeleton";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAuth } from "@clerk/nextjs";
-import { NotificationType } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import {
   HeartIcon,
@@ -19,7 +17,6 @@ import {
   XCircleIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -123,15 +120,6 @@ const NotificationContent = ({
 };
 
 function NotificationsPage() {
-  const router = useRouter();
-  const checkAuthenticated = async () => {
-    const { userId } = useAuth();
-
-    if (!userId) {
-      router.push("/sign-in");
-    }
-  };
-  checkAuthenticated();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
