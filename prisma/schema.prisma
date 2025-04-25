@@ -61,6 +61,8 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  notifications Notification[] // One-to-many relation. A message can have many notifications
+
   // Model level attributes/constraints
   @@index([senderUserId, receiverUserId]) // composite index for faster queries
 }
@@ -162,6 +164,8 @@ model Notification {
   // Optional fields
   postId    String?
   commentId String?
+  messageId String?
+  content   String?
 
   // timestamps
   createdAt DateTime @default(now())
@@ -175,6 +179,7 @@ model Notification {
   // One-to-one relation
   post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade) // One-to-one relation. A notification can be related to one post
   comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade) // One-to-one relation. A notification can be related to one comment
+  message Message? @relation(fields: [messageId], references: [id], onDelete: Cascade, onUpdate: Cascade) // One-to-one relation. A notification can be related to one message
 
   // Model level attributes/constraints
   @@index([userId, createdAt])
