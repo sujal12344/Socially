@@ -4,12 +4,21 @@ import MobileNavbar from "./MobileNavbar";
 import { currentUser } from "@clerk/nextjs/server";
 import { syncUser } from "@/actions/user.action";
 import { getUnreadMessageCount } from "@/actions/message.action";
+import { getIncomingFriendRequest } from "@/actions/friendRequest.action";
+import { getUnreadNotificationCount } from "@/actions/notification.action";
 
 async function Navbar() {
   const user = await currentUser();
   if (user) await syncUser(); // POST
 
-  const unreadCount = user ? await getUnreadMessageCount() : 0;
+  const unreadCount = { message: 0, notification: 0, friendRequest: 0 };
+
+  if (!user) return null;
+  unreadCount.message = await getUnreadMessageCount();
+  unreadCount.notification = await getUnreadNotificationCount();
+  unreadCount.friendRequest = (await getIncomingFriendRequest()).length;
+
+  console.log("unreadCount", unreadCount);
 
   return (
     <nav className="sticky top-0 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50">
