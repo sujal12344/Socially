@@ -26,6 +26,8 @@ const getNotificationIcon = (type: string) => {
       return <MessageCircleIcon className="size-4 text-blue-500" />;
     case "FOLLOW":
       return <UserPlusIcon className="size-4 text-green-500" />;
+    case "MESSAGE":
+      return <MessageCircleIcon className="size-4 text-purple-500" />;
     default:
       return null;
   }
@@ -104,7 +106,19 @@ function NotificationsPage() {
                           ? "started following you"
                           : notification.type === "LIKE"
                           ? "liked your post"
-                          : "commented on your post"}
+                          : notification.type === "COMMENT"
+                          ? "commented on your post"
+                          : notification.type === "MESSAGE"
+                          ? "sent you a message"
+                          : ""}
+                        {notification.type === "MESSAGE" && (
+                          <Link
+                            href={`/chat/${notification.creator.username}`}
+                            className="text-md text-muted-foreground hover:underline"
+                          >
+                            {` "${notification.message?.content}"`}
+                          </Link>
+                        )}
                       </span>
                     </div>
 
