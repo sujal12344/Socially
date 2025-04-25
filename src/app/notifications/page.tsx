@@ -111,14 +111,14 @@ function NotificationsPage() {
                           : notification.type === "MESSAGE"
                           ? "sent you a message"
                           : ""}
-                        {notification.type === "MESSAGE" && (
+                        {/* {notification.type === "MESSAGE" && (
                           <Link
                             href={`/chat/${notification.creator.username}`}
                             className="text-md text-muted-foreground hover:underline"
                           >
                             {` "${notification.message?.content}"`}
                           </Link>
-                        )}
+                        )} */}
                       </span>
                     </div>
 

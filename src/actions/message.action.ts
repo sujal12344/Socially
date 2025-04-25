@@ -144,25 +144,61 @@ export async function sendMessage(receiverUsername: string, content: string) {
     const receiver = await getUserByUsername(receiverUsername);
     if (!receiver) return { success: false, error: "Recipient not found" };
 
-    const message = await prisma.message.create({
-      data: {
-        senderUserId: senderId,
-        receiverUserId: receiver.id,
-        content: content.trim(),
-        read: false,
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-            image: true,
+    const message = await prisma.$transaction(async (tx) => {
+      // Create the message
+      const message = await prisma.message.create({
+        data: {
+          senderUserId: senderId,
+          receiverUserId: receiver.id,
+          content: content.trim(),
+          read: false,
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              image: true,
+            },
           },
         },
-      },
-    });
+      });
 
+      //create notification for the receiver
+      await tx.notification.create({
+        data: {
+          type: "MESSAGE",
+          userId: receiver.id,
+          creatorId: senderId,
+          messageId: message.id,
+          content: content.trim(),
+        },
+      });
+
+      // Update the last message in the conversation
+      // await tx.message.updateMany({
+      //   where: {
+      //     OR: [
+      //       {
+      //         senderUserId: senderId,
+      //         receiverUserId: receiver.id,
+      //       },
+      //       {
+      //         senderUserId: receiver.id,
+      //         receiverUserId: senderId,
+      //       },
+      //     ],
+      //   },
+      //   data: {
+      //     content: content.trim(),
+      //     read: false,
+      //   },
+      // });
+      // revalidatePath("/chat");
+
+      return message;
+    });
     // revalidatePath(`/chat/${receiverUsername}`);
     return { success: true, message };
   } catch (error) {
