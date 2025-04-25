@@ -9,7 +9,7 @@ import { getUnreadNotificationCount } from "@/actions/notification.action";
 
 async function Navbar() {
   const user = await currentUser();
-  if (user) await syncUser(); // POST
+  if (user) await syncUser();
 
   const unreadCount = { message: 0, notification: 0, friendRequest: 0 };
 

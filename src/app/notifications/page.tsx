@@ -9,6 +9,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@clerk/nextjs";
+import { NotificationType } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
 import { HeartIcon, MessageCircleIcon, UserPlusIcon } from "lucide-react";
 import Link from "next/link";
@@ -20,7 +21,7 @@ import toast from "react-hot-toast";
 type Notifications = Awaited<ReturnType<typeof getNotifications>>; // less understanding of the type system
 type Notification = Notifications[number]; // less understanding of the type system
 
-const getNotificationIcon = (type: string) => {
+const getNotificationIcon = (type: NotificationType) => {
   switch (type) {
     case "LIKE":
       return <HeartIcon className="size-4 text-red-500" />;
@@ -32,8 +33,6 @@ const getNotificationIcon = (type: string) => {
       return <MessageCircleIcon className="size-4 text-purple-500" />;
     case "FRIEND_REQUEST":
       return <UserPlusIcon className="size-4 text-yellow-500" />;
-    default:
-      return null;
   }
 };
 
