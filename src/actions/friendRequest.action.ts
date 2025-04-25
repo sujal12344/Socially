@@ -77,12 +77,10 @@ export async function acceptFriendRequest(senderId: string, message?: string) {
       return { error: "Friend request not found" };
     }
 
-    if (friendRequest.receiverId !== userId) {
-      return { error: "You are not authorized to accept this request" };
-    }
-
-    await prisma.$transaction([
-      prisma.friendRequest.update({
+    // Update the request status and create connections
+    await prisma.$transaction(async (prisma) => {
+      // Update the friend request
+      const updated = await prisma.friendRequest.update({
         where: {
           senderId_receiverId: {
             senderId,
@@ -93,35 +91,37 @@ export async function acceptFriendRequest(senderId: string, message?: string) {
           status: "ACCEPTED",
           resMesg: message || null,
         },
-      }),
-      prisma.notification.create({
+      });
+
+      // Create notification with a reference to the friend request
+      await prisma.notification.create({
         data: {
           type: "FRIEND_REQUEST",
           userId: friendRequest.senderId,
           creatorId: userId,
+          friendRequestId: updated.id, // Link to the friend request
         },
-      }),
-      prisma.user.update({
-        where: {
-          id: userId,
-        },
+      });
+
+      // Connect the users as friends
+      await prisma.user.update({
+        where: { id: userId },
         data: {
           friendList: {
             connect: { id: friendRequest.senderId },
           },
         },
-      }),
-      prisma.user.update({
-        where: {
-          id: friendRequest.senderId,
-        },
+      });
+
+      await prisma.user.update({
+        where: { id: friendRequest.senderId },
         data: {
           friendList: {
             connect: { id: userId },
           },
         },
-      }),
-    ]);
+      });
+    });
 
     return { success: true, message: "Friend request accepted" };
   } catch (error) {
@@ -136,27 +136,32 @@ export async function rejectFriendRequest(requestId: string, message?: string) {
     if (!userId) return null;
 
     const friendRequest = await prisma.friendRequest.findUnique({
-      where: {
-        id: requestId, // Assuming requestId is unique
-      },
+      where: { id: requestId },
     });
 
     if (!friendRequest) {
       return { error: "Friend request not found" };
     }
 
-    if (friendRequest.receiverId !== userId) {
-      return { error: "You are not authorized to reject this request" };
-    }
+    // Update the request status and create notification
+    await prisma.$transaction(async (prisma) => {
+      const updated = await prisma.friendRequest.update({
+        where: { id: requestId },
+        data: {
+          status: "REJECTED",
+          resMesg: message || null,
+        },
+      });
 
-    await prisma.friendRequest.update({
-      where: {
-        id: requestId,
-      },
-      data: {
-        status: "REJECTED",
-        resMesg: message || null,
-      },
+      // Create rejection notification
+      await prisma.notification.create({
+        data: {
+          type: "FRIEND_REQUEST",
+          userId: friendRequest.senderId,
+          creatorId: userId,
+          friendRequestId: updated.id,
+        },
+      });
     });
 
     return { success: true, message: "Friend request rejected" };
