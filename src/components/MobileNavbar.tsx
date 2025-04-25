@@ -23,8 +23,9 @@ import { useState } from "react";
 import { useAuth, SignInButton, SignOutButton, useClerk } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import Link from "next/link";
+import { unreadCount } from "@/types";
 
-function MobileNavbar({ unreadCount }: { unreadCount: number }) {
+function MobileNavbar({ unreadCount }: unreadCount) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { isSignedIn } = useAuth();
   const { user } = useClerk();
@@ -75,9 +76,9 @@ function MobileNavbar({ unreadCount }: { unreadCount: number }) {
                   <Link href="/messages" className="relative">
                     <MessageCircleIcon className="w-4 h-4" />
                     Message
-                    {unreadCount > 0 && (
+                    {unreadCount.message > 0 && (
                       <span className="absolute top-2.5 right-10 h-4 w-4 rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
-                        {unreadCount > 99 ? "99+" : unreadCount}
+                        {unreadCount.message > 99 ? "99+" : unreadCount.message}
                       </span>
                     )}
                   </Link>
@@ -90,11 +91,13 @@ function MobileNavbar({ unreadCount }: { unreadCount: number }) {
                   <Link href="/notifications" className="relative">
                     <BellIcon className="w-4 h-4" />
                     Notifications
-                    {/* {unreadCount > 0 && (
+                    {unreadCount.notification > 0 && (
                       <span className="absolute top-2.5 right-10 h-4 w-4 rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
-                        {unreadCount > 99 ? "99+" : unreadCount}
+                        {unreadCount.notification > 99
+                          ? "99+"
+                          : unreadCount.notification}
                       </span>
-                    )} */}
+                    )}
                   </Link>
                 </Button>
                 <Button
@@ -105,9 +108,11 @@ function MobileNavbar({ unreadCount }: { unreadCount: number }) {
                   <Link href="/friends" className="relative">
                     <Users className="w-4 h-4" />
                     Friends
-                    {unreadCount > 0 && (
+                    {unreadCount.friendRequest > 0 && (
                       <span className="absolute top-2.5 right-10 h-4 w-4 rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
-                        {unreadCount > 99 ? "99+" : unreadCount}
+                        {unreadCount.friendRequest > 99
+                          ? "99+"
+                          : unreadCount.friendRequest}
                       </span>
                     )}
                   </Link>

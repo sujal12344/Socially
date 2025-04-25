@@ -10,8 +10,9 @@ import Link from "next/link";
 import { SignInButton, UserButton } from "@clerk/nextjs";
 import ModeToggle from "./ModeToggle";
 import { currentUser } from "@clerk/nextjs/server";
+import { unreadCount } from "@/types";
 
-async function DesktopNavbar({ unreadCount }: { unreadCount: number }) {
+async function DesktopNavbar({ unreadCount }: unreadCount) {
   const user = await currentUser();
 
   return (
@@ -31,9 +32,9 @@ async function DesktopNavbar({ unreadCount }: { unreadCount: number }) {
             <Link href="/chat" className="relative">
               <MessageCircleIcon className="h-5 w-5" />
               <span className="hidden lg:inline ml-1">Messages</span>
-              {unreadCount > 0 && (
+              {unreadCount.message > 0 && (
                 <span className="absolute -top-0.5 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
-                  {unreadCount > 99 ? "99+" : unreadCount}
+                  {unreadCount.message > 99 ? "99+" : unreadCount.message}
                 </span>
               )}
             </Link>
@@ -42,9 +43,11 @@ async function DesktopNavbar({ unreadCount }: { unreadCount: number }) {
             <Link href="/notifications" className="relative">
               <BellIcon className="w-4 h-4" />
               <span className="hidden lg:inline">Notifications</span>
-              {unreadCount > 0 && (
+              {unreadCount.notification > 0 && (
                 <span className="absolute -top-0.5 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
-                  {unreadCount > 99 ? "99+" : unreadCount}
+                  {unreadCount.notification > 99
+                    ? "99+"
+                    : unreadCount.notification}
                 </span>
               )}
             </Link>
@@ -53,9 +56,11 @@ async function DesktopNavbar({ unreadCount }: { unreadCount: number }) {
             <Link href="/friends" className="relative">
               <Users className="h-5 w-5" />
               <span className="hidden lg:inline ml-1">Friends</span>
-              {unreadCount > 0 && (
+              {unreadCount.friendRequest > 0 && (
                 <span className="absolute -top-0.5 -right-1 h-4 w-4 rounded-full bg-primary text-[10px] font-medium flex items-center justify-center text-primary-foreground">
-                  {unreadCount > 99 ? "99+" : unreadCount}
+                  {unreadCount.friendRequest > 99
+                    ? "99+"
+                    : unreadCount.friendRequest}
                 </span>
               )}
             </Link>
