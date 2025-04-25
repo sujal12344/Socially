@@ -11,17 +11,47 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@clerk/nextjs";
 import { NotificationType } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";
-import { HeartIcon, MessageCircleIcon, UserPlusIcon } from "lucide-react";
+import {
+  HeartIcon,
+  MessageCircleIcon,
+  UserPlusIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-type Notifications = Awaited<ReturnType<typeof getNotifications>>; // less understanding of the type system
-type Notification = Notifications[number]; // less understanding of the type system
+type Notifications = Awaited<ReturnType<typeof getNotifications>>;
+type Notification = Notifications[number];
 
-const getNotificationIcon = (type: NotificationType) => {
+const getNotificationMessage = (notification: Notification) => {
+  const { type, friendRequest } = notification;
+
+  switch (type) {
+    case "FOLLOW":
+      return "started following you";
+    case "LIKE":
+      return "liked your post";
+    case "COMMENT":
+      return "commented on your post";
+    case "MESSAGE":
+      return "sent you a message";
+    case "FRIEND_REQUEST":
+      if (!friendRequest) return "sent you a friend request";
+      else if (friendRequest.status === "ACCEPTED") {
+        return "accepted your friend request";
+      } else if (friendRequest.status === "REJECTED") {
+        return "rejected your friend request";
+      }
+  }
+};
+
+const getNotificationIcon = (notification: Notification) => {
+  const { type, friendRequest } = notification;
+
   switch (type) {
     case "LIKE":
       return <HeartIcon className="size-4 text-red-500" />;
@@ -32,8 +62,64 @@ const getNotificationIcon = (type: NotificationType) => {
     case "MESSAGE":
       return <MessageCircleIcon className="size-4 text-purple-500" />;
     case "FRIEND_REQUEST":
-      return <UserPlusIcon className="size-4 text-yellow-500" />;
+      if (!friendRequest)
+        return <UserPlusIcon className="size-4 text-yellow-500" />;
+      else if (friendRequest.status === "ACCEPTED") {
+        return <CheckCircleIcon className="size-4 text-green-500" />;
+      } else if (friendRequest.status === "REJECTED") {
+        return <XCircleIcon className="size-4 text-red-500" />;
+      }
   }
+};
+
+const NotificationContent = ({
+  notification,
+}: {
+  notification: Notification;
+}) => {
+  return (
+    <div className="flex-1 space-y-1">
+      <div className="flex items-center gap-2">
+        {getNotificationIcon(notification)}
+        <span>
+          <Link href={`/profile/${notification.creator.username}`}>
+            <span className="font-medium hover:underline">
+              {notification.creator.name ?? notification.creator.username}
+            </span>{" "}
+          </Link>
+          {getNotificationMessage(notification)}
+        </span>
+      </div>
+
+      {notification.post &&
+        (notification.type === "LIKE" || notification.type === "COMMENT") && (
+          <div className="pl-6 space-y-2">
+            <div className="text-sm text-muted-foreground rounded-md p-2 bg-muted/30 mt-2">
+              <p>{notification.post.content}</p>
+              {notification.post.image && (
+                <img
+                  src={notification.post.image}
+                  alt="Post content"
+                  className="mt-2 rounded-md w-full max-w-[200px] h-auto object-cover"
+                />
+              )}
+            </div>
+
+            {notification.type === "COMMENT" && notification.comment && (
+              <div className="text-sm p-2 bg-accent/50 rounded-md">
+                {notification.comment.content}
+              </div>
+            )}
+          </div>
+        )}
+
+      <p className="text-sm text-muted-foreground pl-6">
+        {formatDistanceToNow(new Date(notification.createdAt), {
+          addSuffix: true,
+        })}
+      </p>
+    </div>
+  );
 };
 
 function NotificationsPage() {
@@ -102,62 +188,8 @@ function NotificationsPage() {
                       />
                     </Avatar>
                   </Link>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      {getNotificationIcon(notification.type)}
-                      <span>
-                        <Link
-                          href={`/profile/${notification.creator.username}`}
-                        >
-                          <span className="font-medium hover:underline">
-                            {notification.creator.name ??
-                              notification.creator.username}
-                          </span>{" "}
-                        </Link>
-                        {notification.type === "FOLLOW"
-                          ? "started following you"
-                          : notification.type === "LIKE"
-                          ? "liked your post"
-                          : notification.type === "COMMENT"
-                          ? "commented on your post"
-                          : notification.type === "MESSAGE"
-                          ? "sent you a message"
-                          : notification.type === "FRIEND_REQUEST"
-                          ? "sent you a friend request"
-                          : ""}
-                      </span>
-                    </div>
 
-                    {notification.post &&
-                      (notification.type === "LIKE" ||
-                        notification.type === "COMMENT") && (
-                        <div className="pl-6 space-y-2">
-                          <div className="text-sm text-muted-foreground rounded-md p-2 bg-muted/30 mt-2">
-                            <p>{notification.post.content}</p>
-                            {notification.post.image && (
-                              <img
-                                src={notification.post.image}
-                                alt="Post content"
-                                className="mt-2 rounded-md w-full max-w-[200px] h-auto object-cover"
-                              />
-                            )}
-                          </div>
-
-                          {notification.type === "COMMENT" &&
-                            notification.comment && (
-                              <div className="text-sm p-2 bg-accent/50 rounded-md">
-                                {notification.comment.content}
-                              </div>
-                            )}
-                        </div>
-                      )}
-
-                    <p className="text-sm text-muted-foreground pl-6">
-                      {formatDistanceToNow(new Date(notification.createdAt), {
-                        addSuffix: true,
-                      })}
-                    </p>
-                  </div>
+                  <NotificationContent notification={notification} />
                 </div>
               ))
             )}
