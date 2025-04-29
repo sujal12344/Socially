@@ -104,6 +104,13 @@ export async function getUserFollowers(username: string) {
           },
         },
       },
+      orderBy: {
+        following: {
+          followers: {
+            _count: "desc",
+          },
+        },
+      },
     });
 
     // Get all users and fetch their isFollowing status in parallel
@@ -149,6 +156,13 @@ export async function getUserFollowings(username: string) {
                 followers: true,
               },
             },
+          },
+        },
+      },
+      orderBy: {
+        follower: {
+          followers: {
+            _count: "desc",
           },
         },
       },
