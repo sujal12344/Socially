@@ -33,6 +33,7 @@ import {
   MapPinIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -96,6 +97,7 @@ export default function ProfilePageClient({
     currentUser?.emailAddresses[0].emailAddress.split("@")[0] === user.username;
 
   const formattedDate = format(new Date(user.createdAt), "MMMM yyyy");
+  const router = useRouter();
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -157,14 +159,21 @@ export default function ProfilePageClient({
                     Edit Profile
                   </Button>
                 ) : (
-                  <Button
-                    className="w-full mt-4"
-                    onClick={handleFollow}
-                    disabled={isUpdatingFollow}
-                    variant={isFollowing ? "outline" : "default"}
-                  >
-                    {isFollowing ? "Unfollow" : "Follow"}
-                  </Button>
+                  <div className="w-full mt-4 grid grid-cols-2 gap-2">
+                    <Button
+                      onClick={handleFollow}
+                      disabled={isUpdatingFollow}
+                      variant={isFollowing ? "outline" : "default"}
+                    >
+                      {isFollowing ? "Unfollow" : "Follow"}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => router.push(`/chat/${user.username}`)}
+                    >
+                      Message
+                    </Button>
+                  </div>
                 )}
 
                 {/* LOCATION & WEBSITE */}
