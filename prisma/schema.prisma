@@ -195,11 +195,15 @@ model Notification {
 }
 
 enum NotificationType {
+  //personalized notifications
   LIKE
   COMMENT
   FOLLOW
   MESSAGE
   FRIEND_REQUEST
+
+  // friends notifications
+  POST //when a friend posts something then show this notification only to the friends
 }
 
 model FriendRequest {

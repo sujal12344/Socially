@@ -7,15 +7,43 @@ import { revalidatePath } from "next/cache";
 export async function createPost(content: string, image: string) {
   try {
     const userId = await getDbUserId();
-
     if (!userId) return;
 
-    const post = await prisma.post.create({
-      data: {
-        content,
-        image,
-        authorId: userId,
-      },
+    const post = await prisma.$transaction(async (tx) => {
+      // Create post first
+      const post = await tx.post.create({
+        data: {
+          content,
+          image,
+          authorId: userId,
+        },
+      });
+
+      // Get all user's friends
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: {
+          friendList: {
+            select: { id: true },
+          },
+        },
+      });
+
+      if (!user) return { success: true, post };
+
+      // Create notifications for all friends
+      if (user.friendList.length) {
+        await tx.notification.createMany({
+          data: user.friendList.map((friend) => ({
+            type: "POST",
+            creatorId: userId,
+            userId: friend.id,
+            postId: post.id,
+          })),
+        });
+      }
+
+      return post;
     });
 
     // revalidatePath("/"); // purge the cache for the home page
@@ -167,7 +195,7 @@ export async function createComment(postId: string, content: string) {
     if (!post) throw new Error("Post not found");
 
     // Create comment and notification in a transaction
-    const [comment] = await prisma.$transaction(async (tx) => {
+    const comment = await prisma.$transaction(async (tx) => {
       // Create comment first
       const newComment = await tx.comment.create({
         data: {
@@ -190,7 +218,7 @@ export async function createComment(postId: string, content: string) {
         });
       }
 
-      return [newComment];
+      return newComment;
     });
 
     // revalidatePath(`/`);
