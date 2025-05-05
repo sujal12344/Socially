@@ -73,6 +73,25 @@ const getNotificationIcon = (notification: Notification) => {
   }
 };
 
+const getNotificationLink = (notification: Notification) => {
+  const { type, creator } = notification;
+  const { username } = creator;
+  switch (type) {
+    case "LIKE":
+      return "/";
+    case "COMMENT":
+      return "/";
+    case "FOLLOW":
+      return `/profile/${username}`;
+    case "MESSAGE":
+      return `/chat/${username}`;
+    case "POST":
+      return "/";
+    case "FRIEND_REQUEST":
+      return `/profile/${username}`;
+  }
+};
+
 const NotificationContent = ({
   notification,
 }: {
@@ -167,7 +186,8 @@ function NotificationsPage() {
               </div>
             ) : (
               notifications.map((notification) => (
-                <div
+                <Link
+                  href={getNotificationLink(notification)}
                   key={notification.id}
                   className={`flex items-start gap-4 p-4 border-b hover:bg-muted/25 transition-colors ${
                     !notification.read ? "bg-muted/50" : ""
@@ -182,7 +202,7 @@ function NotificationsPage() {
                   </Link>
 
                   <NotificationContent notification={notification} />
-                </div>
+                </Link>
               ))
             )}
           </ScrollArea>
