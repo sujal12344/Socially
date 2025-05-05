@@ -23,8 +23,7 @@ import {
 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 
-type Posts = Awaited<ReturnType<typeof getPosts>>; // less understanding of the type system
-type Post = Posts[number]; // less understanding of the type system
+type Post = Awaited<ReturnType<typeof getPosts>>[number];
 
 function PostCard({ post, dbUserId }: { post: Post; dbUserId: string | null }) {
   const { user } = useUser();

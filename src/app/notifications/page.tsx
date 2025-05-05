@@ -21,8 +21,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-type Notifications = Awaited<ReturnType<typeof getNotifications>>;
-type Notification = Notifications[number];
+type Notification = Awaited<ReturnType<typeof getNotifications>>[number];
 
 const getNotificationMessage = (notification: Notification) => {
   const { type, friendRequest } = notification;
