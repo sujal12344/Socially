@@ -15,6 +15,7 @@ import {
   UserPlusIcon,
   CheckCircleIcon,
   XCircleIcon,
+  Twitter,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -35,6 +36,8 @@ const getNotificationMessage = (notification: Notification) => {
       return "commented on your post";
     case "MESSAGE":
       return "sent you a message";
+    case "POST":
+      return "posted a new tweet";
     case "FRIEND_REQUEST":
       if (!friendRequest) return "sent you a friend request";
       else if (friendRequest.status === "ACCEPTED") {
@@ -57,6 +60,8 @@ const getNotificationIcon = (notification: Notification) => {
       return <UserPlusIcon className="size-4 text-green-500" />;
     case "MESSAGE":
       return <MessageCircleIcon className="size-4 text-purple-500" />;
+    case "POST":
+      return <Twitter className="size-4 text-blue-500" />;
     case "FRIEND_REQUEST":
       if (!friendRequest)
         return <UserPlusIcon className="size-4 text-yellow-500" />;
